@@ -3,8 +3,8 @@ import sympy
 from mako.template import Template
 from pathlib import Path
 
-def source(descriptor, moments, collide, boundary_src, float_type, geometry):
-    return Template(filename = str(Path(__file__).parent/'template/kernel.mako')).render(
+def source(target, descriptor, moments, collide, boundary_src, float_type, geometry):
+    return Template(filename = str(Path(__file__).parent/('template/basic.' + target + '.mako'))).render(
         descriptor = descriptor,
         geometry   = geometry,
 
