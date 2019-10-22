@@ -1,6 +1,7 @@
 import sympy
 
 from mako.template import Template
+
 from pathlib import Path
 
 class Generator:
@@ -11,7 +12,11 @@ class Generator:
         self.boundary   = boundary
 
     def kernel(self, target, precision, geometry):
-        return Template(filename = str(Path(__file__).parent/('template/basic.' + target + '.mako'))).render(
+        template_path = Path(__file__).parent/('template/basic.' + target + '.mako')
+        if not template_path.exists():
+            raise Exception("Target '%s' not supported" % target)
+
+        return Template(filename = str(template_path)).render(
             descriptor = self.descriptor,
             geometry   = geometry,
 
