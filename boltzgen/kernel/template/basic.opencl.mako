@@ -70,11 +70,11 @@ __kernel void collide_and_stream(__global ${float_type}* f_next,
 
   ${boundary_src}
 
-% for i, expr in enumerate(collide_subexpr):
+% for i, expr in enumerate(collision_subexpr):
     const ${float_type} ${expr[0]} = ${ccode(expr[1])};
 % endfor
 
-% for i, expr in enumerate(collide_assignment):
+% for i, expr in enumerate(collision_assignment):
     const ${float_type} ${ccode(expr)}
 % endfor
 

@@ -52,15 +52,15 @@ void collide_and_stream(      ${float_type}* f_next,
     ${float_type} ${ccode(expr)}
 % endfor
 
-% for i, expr in enumerate(collide_subexpr):
+% for i, expr in enumerate(collision_subexpr):
     const ${float_type} ${expr[0]} = ${ccode(expr[1])};
 % endfor
 
-% for i, expr in enumerate(collide_assignment):
+% for i, expr in enumerate(collision_assignment):
     const ${float_type} ${ccode(expr)}
 % endfor
 
-% for i, expr in enumerate(collide_assignment):
+% for i, expr in enumerate(collision_assignment):
     preshifted_f_next[${pop_offset(i)}] = m*f_next_${i} + (1.0-m)*${descriptor.w[i].evalf()};
 % endfor
 }

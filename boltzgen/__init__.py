@@ -6,4 +6,4 @@ import lbm.model.D3Q27 as D3Q27
 
 from geometry import Geometry
 
-from kernel.generator import source
+from kernel.generator import Generator
