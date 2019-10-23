@@ -1,11 +1,3 @@
-% if float_type == 'double':
-#if defined(cl_khr_fp64)
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#elif defined(cl_amd_fp64)
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable
-#endif
-% endif
-
 <%
 def gid():
     return {
@@ -15,7 +7,21 @@ def gid():
 
 def pop_offset(i):
     return i * geometry.volume
+
+def neighbor_offset(c_i):
+    return {
+        2: lambda:                                          c_i[1]*geometry.size_x + c_i[0],
+        3: lambda: c_i[2]*geometry.size_x*geometry.size_y + c_i[1]*geometry.size_x + c_i[0]
+    }.get(descriptor.d)()
 %>
+
+% if float_type == 'double':
+#if defined(cl_khr_fp64)
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#elif defined(cl_amd_fp64)
+#pragma OPENCL EXTENSION cl_amd_fp64 : enable
+#endif
+% endif
 
 __kernel void equilibrilize(__global ${float_type}* f_next,
                             __global ${float_type}* f_prev)
@@ -30,15 +36,6 @@ __kernel void equilibrilize(__global ${float_type}* f_next,
     preshifted_f_prev[${pop_offset(i)}] = ${w_i}.f;
 % endfor
 }
-
-<%
-def neighbor_offset(c_i):
-    return {
-        2: lambda:                                          c_i[1]*geometry.size_x + c_i[0],
-        3: lambda: c_i[2]*geometry.size_x*geometry.size_y + c_i[1]*geometry.size_x + c_i[0]
-    }.get(descriptor.d)()
-
-%>
 
 __kernel void collide_and_stream(__global ${float_type}* f_next,
                                  __global ${float_type}* f_prev,
