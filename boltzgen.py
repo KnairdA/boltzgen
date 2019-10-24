@@ -5,6 +5,7 @@ from boltzgen import *
 
 argparser = argparse.ArgumentParser(description='Generate LBM kernels in various languages using a symbolic description.')
 argparser.add_argument('language', help = 'Target language (currently either "opencl" or "cpp")')
+argparser.add_argument('layout',   help = 'Memory layout ("aos" or "soa" for C++, ignored for OpenCL')
 
 args = argparser.parse_args()
 
@@ -14,7 +15,7 @@ generator = Generator(
     moments    = lbm.moments(),
     collision  = lbm.bgk(f_eq = lbm.equilibrium(), tau = 0.6))
 
-geometry = Geometry(32,32)
+geometry = Geometry(1024,1024)
 
-src = generator.kernel(args.language, 'float', geometry)
+src = generator.kernel(args.language, 'double', args.layout, geometry)
 print(src)

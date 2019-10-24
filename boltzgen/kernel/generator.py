@@ -11,7 +11,7 @@ class Generator:
         self.collision  = collision
         self.boundary   = boundary
 
-    def kernel(self, target, precision, geometry):
+    def kernel(self, target, precision, layout, geometry):
         template_path = Path(__file__).parent/('template/basic.' + target + '.mako')
         if not template_path.exists():
             raise Exception("Target '%s' not supported" % target)
@@ -19,6 +19,7 @@ class Generator:
         return Template(filename = str(template_path)).render(
             descriptor = self.descriptor,
             geometry   = geometry,
+            layout     = layout,
 
             moments_subexpr    = self.moments[0],
             moments_assignment = self.moments[1],

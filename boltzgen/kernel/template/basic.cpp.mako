@@ -1,26 +1,41 @@
 <%
+def gid_offset():
+    return {
+        'soa': 1,
+        'aos': descriptor.q
+    }.get(layout);
+
 def pop_offset(i):
-    return i * geometry.volume
+    return {
+        'soa': i * geometry.volume,
+        'aos': i
+    }.get(layout);
 
 def neighbor_offset(c_i):
     return {
-        2: lambda:                                          c_i[1]*geometry.size_x + c_i[0],
-        3: lambda: c_i[2]*geometry.size_x*geometry.size_y + c_i[1]*geometry.size_x + c_i[0]
-    }.get(descriptor.d)()
+        2: lambda:                                          c_i[0]*geometry.size_y + c_i[1],
+        3: lambda: c_i[0]*geometry.size_y*geometry.size_z + c_i[1]*geometry.size_z + c_i[2]
+    }.get(descriptor.d)() * {
+        'soa': 1,
+        'aos': descriptor.q
+    }.get(layout);
 
 def padding():
     return {
-        2: lambda:                                     1*geometry.size_x + 1,
-        3: lambda: 1*geometry.size_x*geometry.size_y + 1*geometry.size_x + 1
-    }.get(descriptor.d)()
+        2: lambda:                                     1*geometry.size_y + 1,
+        3: lambda: 1*geometry.size_y*geometry.size_z + 1*geometry.size_z + 1
+    }.get(descriptor.d)() * {
+        'soa': 1,
+        'aos': descriptor.q
+    }.get(layout);
 %>
 
 void equilibrilize(${float_type}* f_next,
                    ${float_type}* f_prev,
                    std::size_t gid)
 {
-    ${float_type}* preshifted_f_next = f_next + gid;
-    ${float_type}* preshifted_f_prev = f_prev + gid;
+    ${float_type}* preshifted_f_next = f_next + gid*${gid_offset()};
+    ${float_type}* preshifted_f_prev = f_prev + gid*${gid_offset()};
 
 % for i, w_i in enumerate(descriptor.w):
     preshifted_f_next[${pop_offset(i)}] = ${w_i.evalf()};
@@ -30,13 +45,10 @@ void equilibrilize(${float_type}* f_next,
 
 void collide_and_stream(      ${float_type}* f_next,
                         const ${float_type}* f_prev,
-                        const int*  material,
                         std::size_t gid)
 {
-    const int m = material[gid];
-
-          ${float_type}* preshifted_f_next = f_next + gid;
-    const ${float_type}* preshifted_f_prev = f_prev + gid;
+          ${float_type}* preshifted_f_next = f_next + gid*${gid_offset()};
+    const ${float_type}* preshifted_f_prev = f_prev + gid*${gid_offset()};
 
 % for i, c_i in enumerate(descriptor.c):
     const ${float_type} f_curr_${i} = preshifted_f_prev[${pop_offset(i) + neighbor_offset(-c_i)}];
@@ -59,7 +71,7 @@ void collide_and_stream(      ${float_type}* f_next,
 % endfor
 
 % for i, expr in enumerate(collision_assignment):
-    preshifted_f_next[${pop_offset(i)}] = m*f_next_${i} + (1.0-m)*${descriptor.w[i].evalf()};
+    preshifted_f_next[${pop_offset(i)}] = f_next_${i};
 % endfor
 }
 
@@ -68,7 +80,7 @@ void collect_moments(const ${float_type}* f,
                      ${float_type}& rho,
                      ${float_type} u[${descriptor.d}])
 {
-    const ${float_type}* preshifted_f = f + gid;
+    const ${float_type}* preshifted_f = f + gid*${gid_offset()};
 
 % for i in range(0,descriptor.q):
     const ${float_type} f_curr_${i} = preshifted_f[${pop_offset(i)}];
@@ -85,4 +97,76 @@ void collect_moments(const ${float_type}* f,
     u[${i-1}] = ${ccode(expr.rhs)};
 %   endif
 % endfor
+}
+
+void test(std::size_t nStep)
+{
+    auto f_a = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q + 2*padding()});
+    auto f_b = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q + 2*padding()});
+    auto material = std::make_unique<int[]>(${geometry.volume});
+
+    // buffers are padded by maximum neighbor overreach to prevent invalid memory access
+    ${float_type}* f_prev = f_a.get() + ${padding()};
+    ${float_type}* f_next = f_b.get() + ${padding()};
+
+    for (int iX = 0; iX < ${geometry.size_x}; ++iX) {
+        for (int iY = 0; iY < ${geometry.size_y}; ++iY) {
+            for (int iZ = 0; iZ < ${geometry.size_z}; ++iZ) {
+                if (iX == 0 || iY == 0 || iZ == 0 || iX == ${geometry.size_x-1} || iY == ${geometry.size_y-1} || iZ == ${geometry.size_z-1}) {
+                    material[iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ] = 0;
+                } else {
+                    material[iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ] = 1;
+                }
+            }
+        }
+    }
+
+    std::vector<std::size_t> bulk;
+    std::vector<std::size_t> bc;
+
+    for (std::size_t iCell = 0; iCell < ${geometry.volume}; ++iCell) {
+        if (material[iCell] == 0) {
+            bc.emplace_back(iCell);
+        }
+        if (material[iCell] == 1) {
+            bulk.emplace_back(iCell);
+        }
+    }
+
+    for (std::size_t iCell = 0; iCell < ${geometry.volume}; ++iCell) {
+        equilibrilize(f_prev, f_next, iCell);
+    }
+
+    const auto start = std::chrono::high_resolution_clock::now();
+
+    for (std::size_t iStep = 0; iStep < nStep; ++iStep) {
+        if (iStep % 2 == 0) {
+            f_next = f_a.get();
+            f_prev = f_b.get();
+        } else {
+            f_next = f_b.get();
+            f_prev = f_a.get();
+        }
+
+        for (std::size_t i = 0; i < bulk.size(); ++i) {
+            collide_and_stream(f_next, f_prev, bulk[i]);
+        }
+        for (std::size_t i = 0; i < bc.size(); ++i) {
+            equilibrilize(f_next, f_prev, bc[i]);
+        }
+    }
+
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start);
+
+    std::cout << "MLUPS: " << nStep*${geometry.volume}/(1e6*duration.count()) << std::endl;
+
+    // calculate average rho as a basic quality check
+    double rho_sum = 0.0;
+
+    for (std::size_t i = 0; i < ${geometry.volume*descriptor.q}; ++i) {
+        rho_sum += f_next[i];
+    }
+
+    std::cout << "avg rho: " << rho_sum/${geometry.volume} << std::endl;
 }
