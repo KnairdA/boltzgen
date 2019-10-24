@@ -1,8 +1,10 @@
 import sympy
 
 from mako.template import Template
-
 from pathlib import Path
+
+import kernel.target.cl
+import kernel.target.cpp
 
 class Generator:
     def __init__(self, descriptor, moments, collision, boundary = ''):
@@ -16,10 +18,16 @@ class Generator:
         if not template_path.exists():
             raise Exception("Target '%s' not supported" % target)
 
+        layout_impl = eval("kernel.target.%s.%s" % (target, layout))
+        if layout_impl is None:
+            raise Exception("Target '%s' doesn't support layout '%s'" % (target, layout))
+        else:
+            layout_impl = layout_impl(self.descriptor, geometry)
+
         return Template(filename = str(template_path)).render(
             descriptor = self.descriptor,
             geometry   = geometry,
-            layout     = layout,
+            layout     = layout_impl,
 
             moments_subexpr    = self.moments[0],
             moments_assignment = self.moments[1],

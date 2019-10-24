@@ -1,45 +1,13 @@
-<%
-def gid_offset():
-    return {
-        'soa': 1,
-        'aos': descriptor.q
-    }.get(layout);
-
-def pop_offset(i):
-    return {
-        'soa': i * geometry.volume,
-        'aos': i
-    }.get(layout);
-
-def neighbor_offset(c_i):
-    return {
-        2: lambda:                                          c_i[0]*geometry.size_y + c_i[1],
-        3: lambda: c_i[0]*geometry.size_y*geometry.size_z + c_i[1]*geometry.size_z + c_i[2]
-    }.get(descriptor.d)() * {
-        'soa': 1,
-        'aos': descriptor.q
-    }.get(layout);
-
-def padding():
-    return {
-        2: lambda:                                     1*geometry.size_y + 1,
-        3: lambda: 1*geometry.size_y*geometry.size_z + 1*geometry.size_z + 1
-    }.get(descriptor.d)() * {
-        'soa': 1,
-        'aos': descriptor.q
-    }.get(layout);
-%>
-
 void equilibrilize(${float_type}* f_next,
                    ${float_type}* f_prev,
                    std::size_t gid)
 {
-    ${float_type}* preshifted_f_next = f_next + gid*${gid_offset()};
-    ${float_type}* preshifted_f_prev = f_prev + gid*${gid_offset()};
+    ${float_type}* preshifted_f_next = f_next + gid*${layout.gid_offset()};
+    ${float_type}* preshifted_f_prev = f_prev + gid*${layout.gid_offset()};
 
 % for i, w_i in enumerate(descriptor.w):
-    preshifted_f_next[${pop_offset(i)}] = ${w_i.evalf()};
-    preshifted_f_prev[${pop_offset(i)}] = ${w_i.evalf()};
+    preshifted_f_next[${layout.pop_offset(i)}] = ${w_i.evalf()};
+    preshifted_f_prev[${layout.pop_offset(i)}] = ${w_i.evalf()};
 % endfor
 }
 
@@ -47,11 +15,11 @@ void collide_and_stream(      ${float_type}* f_next,
                         const ${float_type}* f_prev,
                         std::size_t gid)
 {
-          ${float_type}* preshifted_f_next = f_next + gid*${gid_offset()};
-    const ${float_type}* preshifted_f_prev = f_prev + gid*${gid_offset()};
+          ${float_type}* preshifted_f_next = f_next + gid*${layout.gid_offset()};
+    const ${float_type}* preshifted_f_prev = f_prev + gid*${layout.gid_offset()};
 
 % for i, c_i in enumerate(descriptor.c):
-    const ${float_type} f_curr_${i} = preshifted_f_prev[${pop_offset(i) + neighbor_offset(-c_i)}];
+    const ${float_type} f_curr_${i} = preshifted_f_prev[${layout.pop_offset(i) + layout.neighbor_offset(-c_i)}];
 % endfor
 
 % for i, expr in enumerate(moments_subexpr):
@@ -71,7 +39,7 @@ void collide_and_stream(      ${float_type}* f_next,
 % endfor
 
 % for i, expr in enumerate(collision_assignment):
-    preshifted_f_next[${pop_offset(i)}] = f_next_${i};
+    preshifted_f_next[${layout.pop_offset(i)}] = f_next_${i};
 % endfor
 }
 
@@ -80,10 +48,10 @@ void collect_moments(const ${float_type}* f,
                      ${float_type}& rho,
                      ${float_type} u[${descriptor.d}])
 {
-    const ${float_type}* preshifted_f = f + gid*${gid_offset()};
+    const ${float_type}* preshifted_f = f + gid*${layout.gid_offset()};
 
 % for i in range(0,descriptor.q):
-    const ${float_type} f_curr_${i} = preshifted_f[${pop_offset(i)}];
+    const ${float_type} f_curr_${i} = preshifted_f[${layout.pop_offset(i)}];
 % endfor
 
 % for i, expr in enumerate(moments_subexpr):
@@ -101,18 +69,19 @@ void collect_moments(const ${float_type}* f,
 
 void test(std::size_t nStep)
 {
-    auto f_a = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q + 2*padding()});
-    auto f_b = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q + 2*padding()});
+    auto f_a = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q + 2*layout.padding()});
+    auto f_b = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q + 2*layout.padding()});
     auto material = std::make_unique<int[]>(${geometry.volume});
 
     // buffers are padded by maximum neighbor overreach to prevent invalid memory access
-    ${float_type}* f_prev = f_a.get() + ${padding()};
-    ${float_type}* f_next = f_b.get() + ${padding()};
+    ${float_type}* f_prev = f_a.get() + ${layout.padding()};
+    ${float_type}* f_next = f_b.get() + ${layout.padding()};
 
     for (int iX = 0; iX < ${geometry.size_x}; ++iX) {
         for (int iY = 0; iY < ${geometry.size_y}; ++iY) {
             for (int iZ = 0; iZ < ${geometry.size_z}; ++iZ) {
-                if (iX == 0 || iY == 0 || iZ == 0 || iX == ${geometry.size_x-1} || iY == ${geometry.size_y-1} || iZ == ${geometry.size_z-1}) {
+                if (iX == 0 || iY == 0 || iZ == 0 ||
+                    iX == ${geometry.size_x-1} || iY == ${geometry.size_y-1} || iZ == ${geometry.size_z-1}) {
                     material[iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ] = 0;
                 } else {
                     material[iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ] = 1;

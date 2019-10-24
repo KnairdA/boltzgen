@@ -4,15 +4,11 @@ import string
 from boltzgen import *
 
 argparser = argparse.ArgumentParser(description='Generate LBM kernels in various languages using a symbolic description.')
-argparser.add_argument('language', help = 'Target language (currently either "opencl" or "cpp")')
-argparser.add_argument(
-    '--layout', dest = 'layout',
-    help = 'Memory layout ("aos" or "soa" for C++, ignored for OpenCL')
+argparser.add_argument('language', help = 'Target language (currently either "cl" or "cpp")')
+argparser.add_argument('--layout', dest = 'layout', help = 'Memory layout ("AOS" or "SOA")', required = True)
+argparser.add_argument('--precision', dest = 'precision', help = 'Floating precision ("float" or "double")', required = True)
 
 args = argparser.parse_args()
-
-if args.language == 'cpp' and args.layout is None:
-    raise Exception('Please specify the memory layout')
 
 lbm = LBM(D2Q9)
 generator = Generator(
@@ -22,5 +18,5 @@ generator = Generator(
 
 geometry = Geometry(1024,1024)
 
-src = generator.kernel(args.language, 'double', args.layout, geometry)
+src = generator.kernel(args.language, args.precision, args.layout, geometry)
 print(src)
