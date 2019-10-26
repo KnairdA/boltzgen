@@ -52,6 +52,7 @@ pkgs.stdenvNoCC.mkDerivation rec {
   in [
     local-python
     pkgs.opencl-info
+    pkgs.universal-ctags
   ];
 
   shellHook = ''
