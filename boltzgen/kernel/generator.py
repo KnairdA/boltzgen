@@ -35,7 +35,10 @@ class Generator:
             collision_subexpr    = self.collision[0],
             collision_assignment = self.collision[1],
 
-            float_type = precision,
+            float_type = {
+                'single': 'float',
+                'double': 'double'
+            }.get(precision),
 
             boundary_src = Template(self.boundary).render(
                 descriptor = self.descriptor,

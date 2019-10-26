@@ -6,7 +6,7 @@ from boltzgen import *
 argparser = argparse.ArgumentParser(description='Generate LBM kernels in various languages using a symbolic description.')
 argparser.add_argument('language', help = 'Target language (currently either "cl" or "cpp")')
 argparser.add_argument('--layout', dest = 'layout', help = 'Memory layout ("AOS" or "SOA")', required = True)
-argparser.add_argument('--precision', dest = 'precision', help = 'Floating precision ("float" or "double")', required = True)
+argparser.add_argument('--precision', dest = 'precision', help = 'Floating precision ("single" or "double")', required = True)
 
 args = argparser.parse_args()
 

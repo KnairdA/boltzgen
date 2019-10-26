@@ -131,7 +131,7 @@ void test(std::size_t nStep)
     std::cout << "MLUPS: " << nStep*${geometry.volume}/(1e6*duration.count()) << std::endl;
 
     // calculate average rho as a basic quality check
-    double rho_sum = 0.0;
+    ${float_type} rho_sum = 0.0;
 
     for (std::size_t i = 0; i < ${geometry.volume*descriptor.q}; ++i) {
         rho_sum += f_next[i];
