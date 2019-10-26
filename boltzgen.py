@@ -15,6 +15,7 @@ argparser.add_argument('--geometry',  required = True, help = 'Size of the block
 argparser.add_argument('--tau',       required = True, help = 'BGK relaxation time')
 
 argparser.add_argument('--disable-cse', action = 'store_const', const = True, help = 'Disable common subexpression elimination')
+argparser.add_argument('--extra', action = 'append', nargs = '+', default = [], help = 'Additional generator parameters')
 
 args = argparser.parse_args()
 
@@ -28,5 +29,5 @@ generator = Generator(
 
 geometry = Geometry.parse(args.geometry)
 
-src = generator.kernel(args.language, args.precision, args.layout, geometry)
+src = generator.kernel(args.language, args.precision, args.layout, geometry, sum(args.extra, []))
 print(src)

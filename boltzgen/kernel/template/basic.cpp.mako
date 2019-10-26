@@ -67,46 +67,37 @@ void collect_moments(const ${float_type}* f,
 % endfor
 }
 
+% if 'test_example' in extras:
 void test(std::size_t nStep)
 {
     auto f_a = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q + 2*layout.padding()});
     auto f_b = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q + 2*layout.padding()});
-    auto material = std::make_unique<int[]>(${geometry.volume});
 
     // buffers are padded by maximum neighbor overreach to prevent invalid memory access
     ${float_type}* f_prev = f_a.get() + ${layout.padding()};
     ${float_type}* f_next = f_b.get() + ${layout.padding()};
 
+    std::vector<std::size_t> bulk;
+    std::vector<std::size_t> bc;
+
     for (int iX = 0; iX < ${geometry.size_x}; ++iX) {
         for (int iY = 0; iY < ${geometry.size_y}; ++iY) {
 % if descriptor.d == 2:
             if (iX == 0 || iY == 0 || iX == ${geometry.size_x-1} || iY == ${geometry.size_y-1}) {
-                material[iX*${geometry.size_y} + iY] = 0;
+                bc.emplace_back(iX*${geometry.size_y} + iY);
             } else {
-                material[iX*${geometry.size_y} + iY] = 1;
+                bulk.emplace_back(iX*${geometry.size_y} + iY);
             }
 % elif descriptor.d == 3:
             for (int iZ = 0; iZ < ${geometry.size_z}; ++iZ) {
                 if (iX == 0 || iY == 0 || iZ == 0 ||
                     iX == ${geometry.size_x-1} || iY == ${geometry.size_y-1} || iZ == ${geometry.size_z-1}) {
-                    material[iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ] = 0;
+                    bc.emplace_back(iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ);
                 } else {
-                    material[iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ] = 1;
+                    bulk.emplace_back(iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ);
                 }
             }
 % endif
-        }
-    }
-
-    std::vector<std::size_t> bulk;
-    std::vector<std::size_t> bc;
-
-    for (std::size_t iCell = 0; iCell < ${geometry.volume}; ++iCell) {
-        if (material[iCell] == 0) {
-            bc.emplace_back(iCell);
-        }
-        if (material[iCell] == 1) {
-            bulk.emplace_back(iCell);
         }
     }
 
@@ -136,14 +127,17 @@ void test(std::size_t nStep)
     auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start);
 
-    std::cout << "MLUPS: " << nStep*${geometry.volume}/(1e6*duration.count()) << std::endl;
-
     // calculate average rho as a basic quality check
     ${float_type} rho_sum = 0.0;
-
     for (std::size_t i = 0; i < ${geometry.volume*descriptor.q}; ++i) {
         rho_sum += f_next[i];
     }
 
-    std::cout << "avg rho: " << rho_sum/${geometry.volume} << std::endl;
+    std::cout << "#bulk   : " << bulk.size() << std::endl;
+    std::cout << "#bc     : " << bc.size()   << std::endl;
+    std::cout << "#steps  : " << nStep       << std::endl;
+    std::cout << std::endl;
+    std::cout << "MLUPS   : " << nStep*${geometry.volume}/(1e6*duration.count()) << std::endl;
+    std::cout << "avg rho : " << rho_sum/${geometry.volume} << std::endl;
 }
+% endif
