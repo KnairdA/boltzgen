@@ -14,6 +14,7 @@ argparser.add_argument('--lattice',   dest = 'lattice',   required = True, help 
 argparser.add_argument('--layout',    dest = 'layout',    required = True, help = 'Memory layout ("AOS" or "SOA")')
 argparser.add_argument('--precision', dest = 'precision', required = True, help = 'Floating precision ("single" or "double")')
 argparser.add_argument('--geometry',  dest = 'geometry',  required = True, help = 'Size of the block geometry ("x:y(:z)")')
+argparser.add_argument('--tau',       dest = 'tau',       required = True, help = 'BGK relaxation time')
 
 args = argparser.parse_args()
 
@@ -23,7 +24,7 @@ lbm = LBM(lattice)
 generator = Generator(
     descriptor = lattice,
     moments    = lbm.moments(),
-    collision  = lbm.bgk(f_eq = lbm.equilibrium(), tau = 0.6))
+    collision  = lbm.bgk(f_eq = lbm.equilibrium(), tau = float(args.tau)))
 
 geometry = Geometry.parse(args.geometry)
 

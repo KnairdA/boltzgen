@@ -51,6 +51,9 @@ class LBM:
         return f_eq
 
     def bgk(self, tau, f_eq, optimize = True):
+        if tau <= 0.5:
+            raise Exception('Relaxation time must be larger than 0.5')
+
         exprs = [ self.f_curr[i] + 1/tau * (f_eq_i - self.f_curr[i]) for i, f_eq_i in enumerate(f_eq) ]
 
         if optimize:
