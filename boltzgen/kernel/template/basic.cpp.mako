@@ -79,6 +79,13 @@ void test(std::size_t nStep)
 
     for (int iX = 0; iX < ${geometry.size_x}; ++iX) {
         for (int iY = 0; iY < ${geometry.size_y}; ++iY) {
+% if descriptor.d == 2:
+            if (iX == 0 || iY == 0 || iX == ${geometry.size_x-1} || iY == ${geometry.size_y-1}) {
+                material[iX*${geometry.size_y} + iY] = 0;
+            } else {
+                material[iX*${geometry.size_y} + iY] = 1;
+            }
+% elif descriptor.d == 3:
             for (int iZ = 0; iZ < ${geometry.size_z}; ++iZ) {
                 if (iX == 0 || iY == 0 || iZ == 0 ||
                     iX == ${geometry.size_x-1} || iY == ${geometry.size_y-1} || iZ == ${geometry.size_z-1}) {
@@ -87,6 +94,7 @@ void test(std::size_t nStep)
                     material[iX*${geometry.size_y*geometry.size_z} + iY*${geometry.size_z} + iZ] = 1;
                 }
             }
+% endif
         }
     }
 
