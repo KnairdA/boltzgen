@@ -15,12 +15,6 @@ class AOS:
             3: lambda: c_i[0]*self.geometry.size_y*self.geometry.size_z + c_i[1]*self.geometry.size_z + c_i[2]
         }.get(self.descriptor.d)()
 
-    def padding(self):
-        return self.descriptor.q * {
-            2: lambda:                                               1*self.geometry.size_y + 1,
-            3: lambda: 1*self.geometry.size_y*self.geometry.size_z + 1*self.geometry.size_z + 1
-        }.get(self.descriptor.d)()
-
 class SOA:
     def __init__(self, descriptor, geometry):
         self.descriptor = descriptor
@@ -36,10 +30,4 @@ class SOA:
         return {
             2: lambda:                                                    c_i[0]*self.geometry.size_y + c_i[1],
             3: lambda: c_i[0]*self.geometry.size_y*self.geometry.size_z + c_i[1]*self.geometry.size_z + c_i[2]
-        }.get(self.descriptor.d)()
-
-    def padding(self):
-        return {
-            2: lambda:                                               1*self.geometry.size_y + 1,
-            3: lambda: 1*self.geometry.size_y*self.geometry.size_z + 1*self.geometry.size_z + 1
         }.get(self.descriptor.d)()
