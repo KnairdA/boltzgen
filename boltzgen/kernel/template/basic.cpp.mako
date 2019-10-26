@@ -240,16 +240,25 @@ void test_ldc(std::size_t nStep)
             f_prev = f_a.get();
         }
 
-        for (std::size_t iCell : bulk) {
-            collide_and_stream(f_next, f_prev, iCell);
+% if 'omp_parallel_for' in extras:
+#pragma omp parallel for
+% endif
+        for (std::size_t i = 0; i < bulk.size(); ++i) {
+            collide_and_stream(f_next, f_prev, bulk[i]);
         }
         ${float_type} u[${descriptor.d}] { 0. };
-        for (std::size_t iCell : box_bc) {
-            velocity_momenta_boundary(f_next, f_prev, iCell, u);
+% if 'omp_parallel_for' in extras:
+#pragma omp parallel for
+% endif
+        for (std::size_t i = 0; i < box_bc.size(); ++i) {
+            velocity_momenta_boundary(f_next, f_prev, box_bc[i], u);
         }
-        u[0] = 0.1;
-        for (std::size_t iCell : lid_bc) {
-            velocity_momenta_boundary(f_next, f_prev, iCell, u);
+        u[0] = 0.05;
+% if 'omp_parallel_for' in extras:
+#pragma omp parallel for
+% endif
+        for (std::size_t i = 0; i < lid_bc.size(); ++i) {
+            velocity_momenta_boundary(f_next, f_prev, lid_bc[i], u);
         }
     }
 
