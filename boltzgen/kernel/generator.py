@@ -24,6 +24,9 @@ class Generator:
         else:
             layout_impl = layout_impl(self.descriptor, geometry)
 
+        if geometry.dimension() != self.descriptor.d:
+            raise Exception('Geometry dimension must match descriptor dimension')
+
         return Template(filename = str(template_path)).render(
             descriptor = self.descriptor,
             geometry   = geometry,

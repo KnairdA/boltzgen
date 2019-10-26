@@ -11,6 +11,7 @@ argparser.add_argument('language', help = 'Target language (currently either "cl
 argparser.add_argument('--lattice',   dest = 'lattice',   required = True, help = 'Lattice type (D2Q9, D3Q7, D3Q19, D3Q27)')
 argparser.add_argument('--layout',    dest = 'layout',    required = True, help = 'Memory layout ("AOS" or "SOA")')
 argparser.add_argument('--precision', dest = 'precision', required = True, help = 'Floating precision ("single" or "double")')
+argparser.add_argument('--geometry',  dest = 'geometry',  required = True, help = 'Size of the block geometry ("x:y(:z)")')
 
 args = argparser.parse_args()
 
@@ -22,7 +23,7 @@ generator = Generator(
     moments    = lbm.moments(),
     collision  = lbm.bgk(f_eq = lbm.equilibrium(), tau = 0.6))
 
-geometry = Geometry(1024,1024)
+geometry = Geometry.parse(args.geometry)
 
 src = generator.kernel(args.language, args.precision, args.layout, geometry)
 print(src)
