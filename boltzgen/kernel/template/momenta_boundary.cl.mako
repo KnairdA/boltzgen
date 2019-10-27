@@ -1,11 +1,11 @@
 <%def name="momenta_boundary(name, param)">
-void ${name}_momenta_boundary(
-          ${float_type}* f_next,
-    const ${float_type}* f_prev,
-    std::size_t gid, ${param})
+__kernel void ${name}_momenta_boundary(
+   __global ${float_type}* f_next,
+   __global ${float_type}* f_prev,
+   unsigned int gid, ${param})
 {
-          ${float_type}* preshifted_f_next = f_next + gid*${layout.gid_offset()};
-    const ${float_type}* preshifted_f_prev = f_prev + gid*${layout.gid_offset()};
+    __global ${float_type}* preshifted_f_next = f_next + gid;
+    __global ${float_type}* preshifted_f_prev = f_prev + gid;
 
 % for i, c_i in enumerate(descriptor.c):
     const ${float_type} f_curr_${i} = preshifted_f_prev[${layout.pop_offset(i) + layout.neighbor_offset(-c_i)}];
@@ -25,16 +25,16 @@ void ${name}_momenta_boundary(
     const ${float_type} ${ccode(expr)}
 % endfor
 
-% for i, expr in enumerate(collision_assignment):
+% for i in range(0,descriptor.q):
     preshifted_f_next[${layout.pop_offset(i)}] = f_next_${i};
 % endfor
 }
 </%def>
 
-<%call expr="momenta_boundary('velocity', '%s velocity[%d]' % (float_type, descriptor.d))">
+<%call expr="momenta_boundary('velocity', '%s%d velocity' % (float_type, descriptor.d))">
     ${float_type} ${ccode(moments_assignment[0])}
 % for i, expr in enumerate(moments_assignment[1:]):
-    ${float_type} ${expr.lhs} = velocity[${i}];
+    ${float_type} ${expr.lhs} = velocity.${['x', 'y', 'z'][i]};
 % endfor
 </%call>
 
