@@ -3,8 +3,7 @@ import sympy
 from mako.template import Template
 from pathlib import Path
 
-import kernel.target.cl
-import kernel.target.cpp
+import kernel.target.layout
 
 class Generator:
     def __init__(self, descriptor, moments, collision):
@@ -33,8 +32,8 @@ class Generator:
             extras = extras
         )
 
-    def kernel(self, target, precision, layout, geometry, functions = ['collide_and_stream'], extras = []):
-        layout_impl = eval("kernel.target.%s.%s" % (target, layout))
+    def kernel(self, target, precision, layout, geometry, functions, extras = []):
+        layout_impl = eval("kernel.target.layout.%s.%s" % (target, layout))
         if layout_impl is None:
             raise Exception("Target '%s' doesn't support layout '%s'" % (target, layout))
         else:
