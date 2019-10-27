@@ -4,6 +4,7 @@ from mako.template import Template
 from pathlib import Path
 
 import kernel.target.layout
+import kernel.target.precision
 
 class Generator:
     def __init__(self, descriptor, moments, collision):
@@ -42,9 +43,6 @@ class Generator:
         if geometry.dimension() != self.descriptor.d:
             raise Exception('Geometry dimension must match descriptor dimension')
 
-        float_type = {
-            'single': 'float',
-            'double': 'double'
-        }.get(precision)
+        float_type = eval("kernel.target.precision.%s" % target).get_float_type(precision)
 
         return "\n".join(map(lambda f: self.instantiate(target, f, float_type, layout_impl, geometry, extras), functions))
