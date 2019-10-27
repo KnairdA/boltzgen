@@ -15,7 +15,8 @@ argparser.add_argument('--geometry',  required = True, help = 'Size of the block
 argparser.add_argument('--tau',       required = True, help = 'BGK relaxation time')
 
 argparser.add_argument('--disable-cse', action = 'store_const', const = True, help = 'Disable common subexpression elimination')
-argparser.add_argument('--extra', action = 'append', nargs = '+', default = [], help = 'Additional generator parameters')
+argparser.add_argument('--functions',   action = 'append', nargs = '+', default = [], help = 'Function templates to be generated')
+argparser.add_argument('--extras',      action = 'append', nargs = '+', default = [], help = 'Additional generator parameters')
 
 args = argparser.parse_args()
 
@@ -29,5 +30,15 @@ generator = Generator(
 
 geometry = Geometry.parse(args.geometry)
 
-src = generator.kernel(args.language, args.precision, args.layout, geometry, sum(args.extra, []))
+functions = sum(args.functions, [])
+if len(functions) == 0:
+    functions += ['default']
+if 'default' in functions:
+    for f in ['collide_and_stream', 'equilibrilize', 'collect_moments', 'momenta_boundary']:
+        functions.insert(functions.index('default'), f)
+    functions.remove('default')
+
+extras = sum(args.extras, [])
+
+src = generator.kernel(args.language, args.precision, args.layout, geometry, functions, extras)
 print(src)

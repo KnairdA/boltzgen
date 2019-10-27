@@ -7,25 +7,15 @@ import kernel.target.cl
 import kernel.target.cpp
 
 class Generator:
-    def __init__(self, descriptor, moments, collision, boundary = ''):
+    def __init__(self, descriptor, moments, collision):
         self.descriptor = descriptor
         self.moments    = moments
         self.collision  = collision
-        self.boundary   = boundary
 
-    def kernel(self, target, precision, layout, geometry, extras = []):
-        template_path = Path(__file__).parent/('template/basic.' + target + '.mako')
+    def instantiate(self, target, template, float_type, layout_impl, geometry, extras = []):
+        template_path = Path(__file__).parent/("template/%s.%s.mako" % (template, target))
         if not template_path.exists():
-            raise Exception("Target '%s' not supported" % target)
-
-        layout_impl = eval("kernel.target.%s.%s" % (target, layout))
-        if layout_impl is None:
-            raise Exception("Target '%s' doesn't support layout '%s'" % (target, layout))
-        else:
-            layout_impl = layout_impl(self.descriptor, geometry)
-
-        if geometry.dimension() != self.descriptor.d:
-            raise Exception('Geometry dimension must match descriptor dimension')
+            raise Exception("Target '%s' doesn't provide '%s'" % (target, template))
 
         return Template(filename = str(template_path)).render(
             descriptor = self.descriptor,
@@ -38,16 +28,24 @@ class Generator:
             collision_assignment = self.collision[1],
             ccode = sympy.ccode,
 
-            float_type = {
-                'single': 'float',
-                'double': 'double'
-            }.get(precision),
-
-            boundary_src = Template(self.boundary).render(
-                descriptor = self.descriptor,
-                geometry   = geometry,
-                float_type = precision
-            ),
+            float_type = float_type,
 
             extras = extras
         )
+
+    def kernel(self, target, precision, layout, geometry, functions = ['collide_and_stream'], extras = []):
+        layout_impl = eval("kernel.target.%s.%s" % (target, layout))
+        if layout_impl is None:
+            raise Exception("Target '%s' doesn't support layout '%s'" % (target, layout))
+        else:
+            layout_impl = layout_impl(self.descriptor, geometry)
+
+        if geometry.dimension() != self.descriptor.d:
+            raise Exception('Geometry dimension must match descriptor dimension')
+
+        float_type = {
+            'single': 'float',
+            'double': 'double'
+        }.get(precision)
+
+        return "\n".join(map(lambda f: self.instantiate(target, f, float_type, layout_impl, geometry, extras), functions))

@@ -1,108 +1,3 @@
-void equilibrilize(${float_type}* f_next,
-                   ${float_type}* f_prev,
-                   std::size_t gid)
-{
-    ${float_type}* preshifted_f_next = f_next + gid*${layout.gid_offset()};
-    ${float_type}* preshifted_f_prev = f_prev + gid*${layout.gid_offset()};
-
-% for i, w_i in enumerate(descriptor.w):
-    preshifted_f_next[${layout.pop_offset(i)}] = ${w_i.evalf()};
-    preshifted_f_prev[${layout.pop_offset(i)}] = ${w_i.evalf()};
-% endfor
-}
-
-void collide_and_stream(      ${float_type}* f_next,
-                        const ${float_type}* f_prev,
-                        std::size_t gid)
-{
-          ${float_type}* preshifted_f_next = f_next + gid*${layout.gid_offset()};
-    const ${float_type}* preshifted_f_prev = f_prev + gid*${layout.gid_offset()};
-
-% for i, c_i in enumerate(descriptor.c):
-    const ${float_type} f_curr_${i} = preshifted_f_prev[${layout.pop_offset(i) + layout.neighbor_offset(-c_i)}];
-% endfor
-
-% for i, expr in enumerate(moments_subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
-% endfor
-
-% for i, expr in enumerate(moments_assignment):
-    ${float_type} ${ccode(expr)}
-% endfor
-
-% for i, expr in enumerate(collision_subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
-% endfor
-
-% for i, expr in enumerate(collision_assignment):
-    const ${float_type} ${ccode(expr)}
-% endfor
-
-% for i, expr in enumerate(collision_assignment):
-    preshifted_f_next[${layout.pop_offset(i)}] = f_next_${i};
-% endfor
-}
-
-void velocity_momenta_boundary(      ${float_type}* f_next,
-                               const ${float_type}* f_prev,
-                               std::size_t gid,
-                               ${float_type} velocity[${descriptor.d}])
-{
-          ${float_type}* preshifted_f_next = f_next + gid*${layout.gid_offset()};
-    const ${float_type}* preshifted_f_prev = f_prev + gid*${layout.gid_offset()};
-
-% for i, c_i in enumerate(descriptor.c):
-    const ${float_type} f_curr_${i} = preshifted_f_prev[${layout.pop_offset(i) + layout.neighbor_offset(-c_i)}];
-% endfor
-
-% for i, expr in enumerate(moments_subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
-% endfor
-
-% for i, expr in enumerate(moments_assignment):
-    ${float_type} ${ccode(expr)}
-% endfor
-% for i, expr in enumerate(moments_assignment[1:]):
-    ${expr.lhs} = velocity[${i}];
-% endfor
-
-% for i, expr in enumerate(collision_subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
-% endfor
-
-% for i, expr in enumerate(collision_assignment):
-    const ${float_type} ${ccode(expr)}
-% endfor
-
-% for i, expr in enumerate(collision_assignment):
-    preshifted_f_next[${layout.pop_offset(i)}] = f_next_${i};
-% endfor
-}
-
-void collect_moments(const ${float_type}* f,
-                     std::size_t gid,
-                     ${float_type}& rho,
-                     ${float_type} u[${descriptor.d}])
-{
-    const ${float_type}* preshifted_f = f + gid*${layout.gid_offset()};
-
-% for i in range(0,descriptor.q):
-    const ${float_type} f_curr_${i} = preshifted_f[${layout.pop_offset(i)}];
-% endfor
-
-% for i, expr in enumerate(moments_subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
-% endfor
-
-% for i, expr in enumerate(moments_assignment):
-%   if i == 0:
-    rho = ${ccode(expr.rhs)};
-%   else:
-    u[${i-1}] = ${ccode(expr.rhs)};
-%   endif
-% endfor
-}
-
 % if 'moments_vtk' in extras:
 void collect_moments_to_vtk(const std::string& path, ${float_type}* f) {
     std::ofstream fout;
@@ -186,7 +81,6 @@ void collect_moments_to_vtk(const std::string& path, ${float_type}* f) {
 }
 % endif
 
-% if 'test_ldc' in extras:
 void test_ldc(std::size_t nStep)
 {
     auto f_a = std::make_unique<${float_type}[]>(${geometry.volume*descriptor.q});
@@ -276,5 +170,3 @@ void test_ldc(std::size_t nStep)
     collect_moments_to_vtk("test.vtk", f_next);
 % endif
 }
-% endif
-
