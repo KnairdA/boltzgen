@@ -59,5 +59,6 @@ pkgs.stdenvNoCC.mkDerivation rec {
     export NIX_SHELL_NAME="${name}"
     export PYOPENCL_COMPILER_OUTPUT=1
     export PYTHONPATH="$PWD/boltzgen:$PYTHONPATH"
+    export PYTHONDONTWRITEBYTECODE=1
   '';
 }
