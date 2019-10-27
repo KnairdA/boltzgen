@@ -1,5 +1,5 @@
 <%def name="momenta_boundary(name, param)">
-__kernel void ${name}_momenta_boundary(
+__kernel void ${name}_momenta_boundary_gid(
    __global ${float_type}* f_next,
    __global ${float_type}* f_prev,
    unsigned int gid, ${param})
@@ -44,3 +44,21 @@ __kernel void ${name}_momenta_boundary(
     ${float_type} ${ccode(expr)}
 % endfor
 </%call>
+
+% if 'cell_list_dispatch' in extras:
+__kernel void velocity_momenta_boundary_cells(__global ${float_type}* f_next,
+                                              __global ${float_type}* f_prev,
+                                              __global unsigned int*  cells,
+                                              ${float_type}${descriptor.d} velocity)
+{
+    velocity_momenta_boundary_gid(f_next, f_prev, cells[get_global_id(0)], velocity);
+}
+
+__kernel void density_momenta_boundary_cells(__global ${float_type}* f_next,
+                                             __global ${float_type}* f_prev,
+                                             __global unsigned int*  cells,
+                                             ${float_type} density)
+{
+    density_momenta_boundary_gid(f_next, f_prev, cells[get_global_id(0)], density);
+}
+% endif

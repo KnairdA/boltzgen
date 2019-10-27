@@ -1,6 +1,6 @@
-__kernel void bounce_back_boundary(__global ${float_type}* f_next,
-                                   __global ${float_type}* f_prev,
-                                   unsigned int gid)
+__kernel void bounce_back_boundary_gid(__global ${float_type}* f_next,
+                                       __global ${float_type}* f_prev,
+                                       unsigned int gid)
 {
     __global ${float_type}* preshifted_f_next = f_next + gid;
     __global ${float_type}* preshifted_f_prev = f_prev + gid;
@@ -29,3 +29,12 @@ __kernel void bounce_back_boundary(__global ${float_type}* f_next,
     preshifted_f_next[${layout.pop_offset(i)}] = f_next_${descriptor.c.index(-c_i)};
 % endfor
 }
+
+% if 'cell_list_dispatch' in extras:
+__kernel void bounce_back_boundary_cells(__global ${float_type}* f_next,
+                                         __global ${float_type}* f_prev,
+                                         __global unsigned int*  cells)
+{
+    bounce_back_boundary_gid(f_next, f_prev, cells[get_global_id(0)]);
+}
+% endif

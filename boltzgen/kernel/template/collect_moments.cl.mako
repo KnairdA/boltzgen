@@ -1,6 +1,6 @@
-__kernel void collect_moments(__global ${float_type}* f,
-                              __global ${float_type}* moments,
-                              unsigned int gid)
+__kernel void collect_moments_gid(__global ${float_type}* f,
+                                  __global ${float_type}* moments,
+                                  unsigned int gid)
 {
     __global ${float_type}* preshifted_f = f + gid;
 
@@ -16,3 +16,12 @@ __kernel void collect_moments(__global ${float_type}* f,
     moments[${layout.pop_offset(i)} + gid] = ${ccode(expr.rhs)};
 % endfor
 }
+
+% if 'cell_list_dispatch' in extras:
+__kernel void collect_moments_cells(__global ${float_type}* f,
+                                    __global ${float_type}* moments,
+                                    __global unsigned int*  cells)
+{
+    collect_moments_gid(f, moments, cells[get_global_id(0)]);
+}
+% endif

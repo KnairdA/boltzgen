@@ -1,6 +1,6 @@
-__kernel void collide_and_stream(__global ${float_type}* f_next,
-                                 __global ${float_type}* f_prev,
-                                 unsigned int gid)
+__kernel void collide_and_stream_gid(__global ${float_type}* f_next,
+                                     __global ${float_type}* f_prev,
+                                     unsigned int gid)
 {
     __global ${float_type}* preshifted_f_next = f_next + gid;
     __global ${float_type}* preshifted_f_prev = f_prev + gid;
@@ -29,3 +29,12 @@ __kernel void collide_and_stream(__global ${float_type}* f_next,
     preshifted_f_next[${layout.pop_offset(i)}] = f_next_${i};
 % endfor
 }
+
+% if 'cell_list_dispatch' in extras:
+__kernel void collide_and_stream_cells(__global ${float_type}* f_next,
+                                       __global ${float_type}* f_prev,
+                                       __global unsigned int*  cells)
+{
+    collide_and_stream_gid(f_next, f_prev, cells[get_global_id(0)]);
+}
+% endif

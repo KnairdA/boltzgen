@@ -12,6 +12,7 @@ At the moment this is a more structured and cleaned up version of the OpenCL ker
 * equilibrilization and moment collection utility functions
 * optimization via common subexpression elimination
 * array-of-structures and structure-of-arrays memory layouts
+* static resolution of memory offsets
 * AB streaming pattern
 * C++ and OpenCL targets
 * simple CLI frontend
