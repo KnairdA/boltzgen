@@ -1,8 +1,7 @@
 __kernel void equilibrilize(__global ${float_type}* f_next,
-                            __global ${float_type}* f_prev)
+                            __global ${float_type}* f_prev,
+                            unsigned int gid)
 {
-    const unsigned int gid = ${layout.gid()};
-
     __global ${float_type}* preshifted_f_next = f_next + gid;
     __global ${float_type}* preshifted_f_prev = f_prev + gid;
 

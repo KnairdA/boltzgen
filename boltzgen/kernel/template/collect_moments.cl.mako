@@ -1,8 +1,7 @@
 __kernel void collect_moments(__global ${float_type}* f,
-                              __global ${float_type}* moments)
+                              __global ${float_type}* moments,
+                              unsigned int gid)
 {
-    const unsigned int gid = ${layout.gid()};
-
     __global ${float_type}* preshifted_f = f + gid;
 
 % for i in range(0,descriptor.q):
