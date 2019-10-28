@@ -5,7 +5,7 @@ import numpy.core.numeric as _nx
 class ndindex(numpy.ndindex):
     pass
 
-    def __init__(self, *shape, order):
+    def __init__(self, *shape, order='F'):
         if len(shape) == 1 and isinstance(shape[0], tuple):
             shape = shape[0]
         x = as_strided(_nx.zeros(1), shape=shape,
