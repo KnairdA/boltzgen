@@ -1,10 +1,5 @@
-from lbm import LBM
+import boltzgen.lbm.model
 
-import lbm.model.D2Q9
-import lbm.model.D3Q7
-import lbm.model.D3Q19
-import lbm.model.D3Q27
-
-from geometry import Geometry
-
-from kernel.generator import Generator
+from boltzgen.lbm              import LBM
+from boltzgen.geometry         import Geometry
+from boltzgen.kernel.generator import Generator

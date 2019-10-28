@@ -1,2 +1,2 @@
-import kernel.target.layout.cl
-import kernel.target.layout.cpp
+from . import cl
+from . import cpp

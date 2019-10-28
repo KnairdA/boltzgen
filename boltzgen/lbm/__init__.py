@@ -1,8 +1,8 @@
 from sympy import *
 from sympy.codegen.ast import Assignment
 
-import utility.optimizations as optimizations
-from lbm.model.characteristics import weights, c_s
+import boltzgen.utility.optimizations as optimizations
+from boltzgen.lbm.model.characteristics import weights, c_s
 
 
 def assign(names, definitions):

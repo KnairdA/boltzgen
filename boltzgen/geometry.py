@@ -1,5 +1,5 @@
 import re
-from utility.ndindex import ndindex
+from .utility.ndindex import ndindex
 
 class Geometry:
     def __init__(self, size_x, size_y, size_z = 1):

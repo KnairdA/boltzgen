@@ -3,8 +3,7 @@ import sympy
 from mako.template import Template
 from pathlib import Path
 
-import kernel.target.layout
-import kernel.target.precision
+import boltzgen.kernel.target
 
 class Generator:
     def __init__(self, descriptor, moments, collision):
@@ -34,7 +33,7 @@ class Generator:
         )
 
     def kernel(self, target, precision, layout, geometry, functions, extras = []):
-        layout_impl = eval("kernel.target.layout.%s.%s" % (target, layout))
+        layout_impl = eval("boltzgen.kernel.target.layout.%s.%s" % (target, layout))
         if layout_impl is None:
             raise Exception("Target '%s' doesn't support layout '%s'" % (target, layout))
         else:
@@ -43,6 +42,6 @@ class Generator:
         if geometry.dimension() != self.descriptor.d:
             raise Exception('Geometry dimension must match descriptor dimension')
 
-        float_type = eval("kernel.target.precision.%s" % target).get_float_type(precision)
+        float_type = eval("boltzgen.kernel.target.precision.%s" % target).get_float_type(precision)
 
         return "\n".join(map(lambda f: self.instantiate(target, f, float_type, layout_impl, geometry, extras), functions))
