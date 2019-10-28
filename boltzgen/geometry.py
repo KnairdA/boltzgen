@@ -24,8 +24,8 @@ class Geometry:
         else:
             raise Exception('Geometry malformed')
 
-    def inner_cells(self):
-        for idx in numpy.ndindex(self.inner_size()):
+    def inner_cells(self, order='F'):
+        for idx in ndindex(self.inner_size(), order):
             yield tuple(map(lambda i: i + 1, idx))
 
     def size(self):
