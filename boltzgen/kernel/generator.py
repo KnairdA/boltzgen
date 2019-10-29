@@ -3,23 +3,23 @@ import sympy
 from mako.template import Template
 from pathlib import Path
 
-from . import target
+from . import memory
 
 class Generator:
-    def __init__(self, descriptor, moments, collision, language, precision, index, layout):
+    def __init__(self, descriptor, moments, collision, target, precision, index, layout):
         self.descriptor = descriptor
         self.moments    = moments
         self.collision  = collision
-        self.target     = language
-        self.float_type = eval("target.precision.%s" % language).get_float_type(precision)
+        self.target     = target
+        self.float_type = eval("memory.precision.%s" % target).get_float_type(precision)
 
         try:
-            self.index_impl = eval("target.index.%s" % index)
+            self.index_impl = eval("memory.index.%s" % index)
         except AttributeError:
             raise Exception("There is no cell indexing scheme '%s'" % index) from None
 
         try:
-            self.layout_impl = eval("target.layout.%s" % layout)
+            self.layout_impl = eval("memory.layout.%s" % layout)
         except AttributeError:
             raise Exception("There is no layout '%s'" % layout) from None
 

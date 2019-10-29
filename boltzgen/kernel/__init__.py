@@ -1,2 +1,2 @@
 from . import generator
-from . import target
+from . import memory
