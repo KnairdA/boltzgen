@@ -1,2 +1,2 @@
-from . import cl
-from . import cpp
+from .AOS import AOS
+from .SOA import SOA

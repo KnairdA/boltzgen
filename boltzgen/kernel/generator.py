@@ -32,16 +32,24 @@ class Generator:
             extras = extras
         )
 
-    def kernel(self, target, precision, layout, geometry, functions, extras = []):
-        layout_impl = eval("boltzgen.kernel.target.layout.%s.%s" % (target, layout))
-        if layout_impl is None:
-            raise Exception("Target '%s' doesn't support layout '%s'" % (target, layout))
+    def kernel(self, target, precision, layout, cell_index, geometry, functions, extras = []):
+        cell_index_impl = eval("boltzgen.kernel.target.cell_index.%s" % cell_index)
+        if cell_index_impl is None:
+            raise Exception("There is no cell indexing scheme '%s'" % (target, layout))
         else:
-            layout_impl = layout_impl(self.descriptor, geometry)
+            cell_index_impl = cell_index_impl(geometry)
+
+        layout_impl = eval("boltzgen.kernel.target.layout.%s" % layout)
+        if layout_impl is None:
+            raise Exception("There is no layout '%s'" % (target, layout))
+        else:
+            layout_impl = layout_impl(self.descriptor, cell_index_impl, geometry)
 
         if geometry.dimension() != self.descriptor.d:
             raise Exception('Geometry dimension must match descriptor dimension')
 
         float_type = eval("boltzgen.kernel.target.precision.%s" % target).get_float_type(precision)
 
-        return "\n".join(map(lambda f: self.instantiate(target, f, float_type, layout_impl, geometry, extras), functions))
+        return "\n".join(map(
+            lambda f: self.instantiate(target, f, float_type, layout_impl, geometry, extras),
+            functions))
