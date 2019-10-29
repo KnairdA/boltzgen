@@ -4,8 +4,8 @@ void ${name}_momenta_boundary(
     const ${float_type}* f_prev,
     std::size_t gid, ${param})
 {
-          ${float_type}* preshifted_f_next = f_next + gid*${layout.gid_offset()};
-    const ${float_type}* preshifted_f_prev = f_prev + gid*${layout.gid_offset()};
+          ${float_type}* preshifted_f_next = f_next + ${layout.cell_preshift('gid')};
+    const ${float_type}* preshifted_f_prev = f_prev + ${layout.cell_preshift('gid')};
 
 % for i, c_i in enumerate(descriptor.c):
     const ${float_type} f_curr_${i} = preshifted_f_prev[${layout.pop_offset(i) + layout.neighbor_offset(-c_i)}];

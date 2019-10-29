@@ -2,7 +2,7 @@ __kernel void collect_moments_gid(__global ${float_type}* f,
                                   __global ${float_type}* moments,
                                   unsigned int gid)
 {
-    __global ${float_type}* preshifted_f = f + gid;
+    __global ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
 
 % for i in range(0,descriptor.q):
     const ${float_type} f_curr_${i} = preshifted_f[${layout.pop_offset(i)}];

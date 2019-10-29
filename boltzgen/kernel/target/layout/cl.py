@@ -3,11 +3,8 @@ class SOA:
         self.descriptor = descriptor
         self.geometry = geometry
 
-    def gid(self):
-        return {
-            2: 'get_global_id(1)*%d + get_global_id(0)' % self.geometry.size_x,
-            3: 'get_global_id(2)*%d + get_global_id(1)*%d + get_global_id(0)' % (self.geometry.size_x*self.geometry.size_y, self.geometry.size_x)
-        }.get(self.descriptor.d)
+    def cell_preshift(self, gid):
+        return gid
 
     def pop_offset(self, i):
         return i * self.geometry.volume
@@ -23,11 +20,8 @@ class AOS:
         self.descriptor = descriptor
         self.geometry = geometry
 
-    def gid(self):
-        return {
-            2: '%d*(get_global_id(1)*%d + get_global_id(0))' % (self.descriptor.q, self.geometry.size_x),
-            3: '%d*(get_global_id(2)*%d + get_global_id(1)*%d + get_global_id(0))' % (self.descriptor.q, self.geometry.size_x*self.geometry.size_y, self.geometry.size_x)
-        }.get(self.descriptor.d)
+    def cell_preshift(self, gid):
+        return "(%s)*%d" % (gid, self.descriptor.q)
 
     def pop_offset(self, i):
         return i

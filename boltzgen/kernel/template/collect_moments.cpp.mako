@@ -3,7 +3,7 @@ void collect_moments(const ${float_type}* f,
                      ${float_type}& rho,
                      ${float_type} u[${descriptor.d}])
 {
-    const ${float_type}* preshifted_f = f + gid*${layout.gid_offset()};
+    const ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
 
 % for i in range(0,descriptor.q):
     const ${float_type} f_curr_${i} = preshifted_f[${layout.pop_offset(i)}];
