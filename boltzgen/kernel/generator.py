@@ -3,23 +3,36 @@ import sympy
 from mako.template import Template
 from pathlib import Path
 
-import boltzgen.kernel.target
+from . import target
 
 class Generator:
-    def __init__(self, descriptor, moments, collision):
+    def __init__(self, descriptor, moments, collision, language, precision, index, layout):
         self.descriptor = descriptor
         self.moments    = moments
         self.collision  = collision
+        self.target     = language
+        self.float_type = eval("target.precision.%s" % language).get_float_type(precision)
 
-    def instantiate(self, target, template, float_type, layout_impl, geometry, extras = []):
-        template_path = Path(__file__).parent/("template/%s.%s.mako" % (template, target))
+        try:
+            self.index_impl = eval("target.index.%s" % index)
+        except AttributeError:
+            raise Exception("There is no cell indexing scheme '%s'" % index) from None
+
+        try:
+            self.layout_impl = eval("target.layout.%s" % layout)
+        except AttributeError:
+            raise Exception("There is no layout '%s'" % layout) from None
+
+    def instantiate(self, template, geometry, extras = []):
+        template_path = Path(__file__).parent/("template/%s.%s.mako" % (template, self.target))
         if not template_path.exists():
-            raise Exception("Target '%s' doesn't provide '%s'" % (target, template))
+            raise Exception("Target '%s' doesn't provide '%s'" % (self.target, template))
 
         return Template(filename = str(template_path)).render(
             descriptor = self.descriptor,
             geometry   = geometry,
-            layout     = layout_impl,
+            index      = self.index_impl(geometry),
+            layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
 
             moments_subexpr    = self.moments[0],
             moments_assignment = self.moments[1],
@@ -27,29 +40,13 @@ class Generator:
             collision_assignment = self.collision[1],
             ccode = sympy.ccode,
 
-            float_type = float_type,
+            float_type = self.float_type,
 
             extras = extras
         )
 
-    def kernel(self, target, precision, layout, cell_index, geometry, functions, extras = []):
-        cell_index_impl = eval("boltzgen.kernel.target.cell_index.%s" % cell_index)
-        if cell_index_impl is None:
-            raise Exception("There is no cell indexing scheme '%s'" % (target, layout))
-        else:
-            cell_index_impl = cell_index_impl(geometry)
-
-        layout_impl = eval("boltzgen.kernel.target.layout.%s" % layout)
-        if layout_impl is None:
-            raise Exception("There is no layout '%s'" % (target, layout))
-        else:
-            layout_impl = layout_impl(self.descriptor, cell_index_impl, geometry)
-
+    def kernel(self, geometry, functions, extras = []):
         if geometry.dimension() != self.descriptor.d:
             raise Exception('Geometry dimension must match descriptor dimension')
 
-        float_type = eval("boltzgen.kernel.target.precision.%s" % target).get_float_type(precision)
-
-        return "\n".join(map(
-            lambda f: self.instantiate(target, f, float_type, layout_impl, geometry, extras),
-            functions))
+        return "\n".join(map(lambda f: self.instantiate(f, geometry, extras), functions))

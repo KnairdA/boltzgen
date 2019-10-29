@@ -10,7 +10,7 @@ argparser.add_argument('language', help = 'Target language (currently either "cl
 
 argparser.add_argument('--lattice',   required = True,  help = 'Lattice type (D2Q9, D3Q7, D3Q19, D3Q27)')
 argparser.add_argument('--layout',    required = True,  help = 'Memory layout ("AOS" or "SOA")')
-argparser.add_argument('--indexing',  required = False, help = 'Cell indexing ("XYZ" or "ZYX")')
+argparser.add_argument('--index',     required = False, help = 'Cell indexing ("XYZ" or "ZYX")')
 argparser.add_argument('--precision', required = True,  help = 'Floating precision ("single" or "double")')
 argparser.add_argument('--geometry',  required = True,  help = 'Size of the block geometry ("x:y(:z)")')
 argparser.add_argument('--tau',       required = True,  help = 'BGK relaxation time')
@@ -23,14 +23,18 @@ args = argparser.parse_args()
 
 lattice = eval("lbm.model.%s" % args.lattice)
 
+if args.index is None:
+    args.index = 'XYZ'
+
 lbm = LBM(lattice)
 generator = Generator(
     descriptor = lattice,
     moments    = lbm.moments(optimize = not args.disable_cse),
-    collision  = lbm.bgk(f_eq = lbm.equilibrium(), tau = float(args.tau), optimize = not args.disable_cse))
-
-if args.indexing is None:
-    args.indexing = 'XYZ'
+    collision  = lbm.bgk(f_eq = lbm.equilibrium(), tau = float(args.tau), optimize = not args.disable_cse),
+    language   = args.language,
+    precision  = args.precision,
+    index      = args.index,
+    layout     = args.layout)
 
 geometry = Geometry.parse(args.geometry)
 
@@ -44,5 +48,5 @@ if 'default' in functions:
 
 extras = sum(args.extras, [])
 
-src = generator.kernel(args.language, args.precision, args.layout, args.indexing, geometry, functions, extras)
+src = generator.kernel(geometry, functions, extras)
 print(src)

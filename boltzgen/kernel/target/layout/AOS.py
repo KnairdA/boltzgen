@@ -1,7 +1,7 @@
 class AOS:
-    def __init__(self, descriptor, cell_index, geometry):
+    def __init__(self, descriptor, index, geometry):
         self.descriptor = descriptor
-        self.cell_index = cell_index
+        self.index    = index(geometry)
         self.geometry = geometry
 
     def cell_preshift(self, gid):
@@ -11,4 +11,4 @@ class AOS:
         return i
 
     def neighbor_offset(self, c_i):
-        return self.descriptor.q * self.cell_index.neighbor(c_i)
+        return self.descriptor.q * self.index.neighbor(c_i)
