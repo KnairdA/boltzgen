@@ -50,3 +50,19 @@ class Generator:
             raise Exception('Geometry dimension must match descriptor dimension')
 
         return "\n".join(map(lambda f: self.instantiate(f, geometry, extras), functions))
+
+    def custom(self, geometry, source):
+        return Template(text = source).render(
+            descriptor = self.descriptor,
+            geometry   = geometry,
+            index      = self.index_impl(geometry),
+            layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
+
+            moments_subexpr    = self.moments[0],
+            moments_assignment = self.moments[1],
+            collision_subexpr    = self.collision[0],
+            collision_assignment = self.collision[1],
+            ccode = sympy.ccode,
+
+            float_type = self.float_type,
+        )
