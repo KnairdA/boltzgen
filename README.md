@@ -54,8 +54,7 @@ optional arguments:
 \                   --layout AOS
 \                   --precision double
 \                   --tau 0.52
-\                   --functions default bounce_back_boundary example
-\                   --extras omp_parallel_for moments_vtk | tee kernel.h
+\                   --functions default bounce_back_boundary | tee kernel.h
 void collide_and_stream(      double* f_next,
                         const double* f_prev,
                         std::size_t gid)
