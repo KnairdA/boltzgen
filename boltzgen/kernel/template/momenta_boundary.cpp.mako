@@ -1,3 +1,8 @@
+<%
+moments_subexpr, moments_assignment = model.moments()
+collision_subexpr, collision_assignment = model.bgk(f_eq = model.equilibrium(resolve_moments = False))
+%>
+
 <%def name="momenta_boundary(name, param)">
 void ${name}_momenta_boundary(
           ${float_type}* f_next,

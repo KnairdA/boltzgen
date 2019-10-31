@@ -9,23 +9,19 @@ void collide_and_stream(      ${float_type}* f_next,
     const ${float_type} f_curr_${i} = preshifted_f_prev[${layout.pop_offset(i) + layout.neighbor_offset(-c_i)}];
 % endfor
 
-% for i, expr in enumerate(moments_subexpr):
+<%
+    subexpr, assignment = model.bgk(f_eq = model.equilibrium(resolve_moments = True))
+%>
+
+% for i, expr in enumerate(subexpr):
     const ${float_type} ${expr[0]} = ${ccode(expr[1])};
 % endfor
 
-% for i, expr in enumerate(moments_assignment):
-    ${float_type} ${ccode(expr)}
-% endfor
-
-% for i, expr in enumerate(collision_subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
-% endfor
-
-% for i, expr in enumerate(collision_assignment):
+% for i, expr in enumerate(assignment):
     const ${float_type} ${ccode(expr)}
 % endfor
 
-% for i, expr in enumerate(collision_assignment):
+% for i, expr in enumerate(assignment):
     preshifted_f_next[${layout.pop_offset(i)}] = f_next_${i};
 % endfor
 }

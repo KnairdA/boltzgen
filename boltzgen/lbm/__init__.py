@@ -9,8 +9,14 @@ def assign(names, definitions):
     return list(map(lambda x: Assignment(*x), zip(names, definitions)))
 
 class LBM:
-    def __init__(self, descriptor):
+    def __init__(self, descriptor, tau, optimize = True):
         self.descriptor = descriptor
+        self.tau        = tau
+        self.optimize   = optimize
+
+        if self.tau <= 0.5:
+            raise Exception('Relaxation time must be larger than 0.5')
+
         self.f_next = symarray('f_next', descriptor.q)
         self.f_curr = symarray('f_curr', descriptor.q)
 
@@ -20,7 +26,10 @@ class LBM:
         if not hasattr(descriptor, 'c_s'):
             self.descriptor.c_s = c_s(descriptor.d, descriptor.c, self.descriptor.w)
 
-    def moments(self, optimize = True):
+    def moments(self, optimize = None):
+        if optimize is None:
+            optimize = self.optimize
+
         rho = symbols('rho')
         u   = Matrix(symarray('u', self.descriptor.d))
 
@@ -35,9 +44,15 @@ class LBM:
         else:
             return ([], exprs)
 
-    def equilibrium(self):
+    def equilibrium(self, resolve_moments = False):
         rho = symbols('rho')
         u   = Matrix(symarray('u', self.descriptor.d))
+
+        if resolve_moments:
+            moments = self.moments(optimize = False)[1]
+            rho = moments[0].rhs
+            for i, m in enumerate(moments[1:]):
+                u[i] = m.rhs
 
         f_eq = []
 
@@ -50,11 +65,11 @@ class LBM:
 
         return f_eq
 
-    def bgk(self, tau, f_eq, optimize = True):
-        if tau <= 0.5:
-            raise Exception('Relaxation time must be larger than 0.5')
+    def bgk(self, f_eq, optimize = None):
+        if optimize is None:
+            optimize = self.optimize
 
-        exprs = [ self.f_curr[i] + 1/tau * (f_eq_i - self.f_curr[i]) for i, f_eq_i in enumerate(f_eq) ]
+        exprs = [ self.f_curr[i] + 1/self.tau * (f_eq_i - self.f_curr[i]) for i, f_eq_i in enumerate(f_eq) ]
 
         if optimize:
             subexprs, f = cse(exprs, optimizations=optimizations.custom)

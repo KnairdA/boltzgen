@@ -26,11 +26,8 @@ lattice = eval("lbm.model.%s" % args.lattice)
 if args.index is None:
     args.index = 'XYZ'
 
-lbm = LBM(lattice)
 generator = Generator(
-    descriptor = lattice,
-    moments    = lbm.moments(optimize = not args.disable_cse),
-    collision  = lbm.bgk(f_eq = lbm.equilibrium(), tau = float(args.tau), optimize = not args.disable_cse),
+    model      = LBM(lattice, tau = float(args.tau), optimize = not args.disable_cse),
     target     = args.target,
     precision  = args.precision,
     index      = args.index,

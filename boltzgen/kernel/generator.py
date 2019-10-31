@@ -6,10 +6,9 @@ from pathlib import Path
 from . import memory
 
 class Generator:
-    def __init__(self, descriptor, moments, collision, target, precision, index, layout):
-        self.descriptor = descriptor
-        self.moments    = moments
-        self.collision  = collision
+    def __init__(self, model, target, precision, index, layout):
+        self.model      = model
+        self.descriptor = self.model.descriptor
         self.target     = target
         self.float_type = eval("memory.precision.%s" % target).get_float_type(precision)
 
@@ -30,14 +29,11 @@ class Generator:
 
         return Template(filename = str(template_path)).render(
             descriptor = self.descriptor,
+            model      = self.model,
             geometry   = geometry,
             index      = self.index_impl(geometry),
             layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
 
-            moments_subexpr    = self.moments[0],
-            moments_assignment = self.moments[1],
-            collision_subexpr    = self.collision[0],
-            collision_assignment = self.collision[1],
             ccode = sympy.ccode,
 
             float_type = self.float_type,
@@ -54,14 +50,11 @@ class Generator:
     def custom(self, geometry, source):
         return Template(text = source).render(
             descriptor = self.descriptor,
+            model      = self.model,
             geometry   = geometry,
             index      = self.index_impl(geometry),
             layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
 
-            moments_subexpr    = self.moments[0],
-            moments_assignment = self.moments[1],
-            collision_subexpr    = self.collision[0],
-            collision_assignment = self.collision[1],
             ccode = sympy.ccode,
 
             float_type = self.float_type,

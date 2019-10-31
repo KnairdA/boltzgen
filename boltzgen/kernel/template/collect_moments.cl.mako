@@ -9,6 +9,10 @@ __kernel void collect_moments_gid(__global ${float_type}* f,
     const ${float_type} f_curr_${i} = preshifted_f[${layout.pop_offset(i)}];
 % endfor
 
+<%
+    moments_subexpr, moments_assignment = model.moments()
+%>
+
 % for i, expr in enumerate(moments_subexpr):
     const ${float_type} ${expr[0]} = ${ccode(expr[1])};
 % endfor
