@@ -8,7 +8,8 @@ argparser = argparse.ArgumentParser(
 
 argparser.add_argument('target', help = 'Target language (currently either "cl" or "cpp")')
 
-argparser.add_argument('--lattice',   required = True,  help = 'Lattice type (D2Q9, D3Q7, D3Q19, D3Q27)')
+argparser.add_argument('--lattice',   required = True,  help = 'Lattice type ("D2Q9", "D3Q7", "D3Q19", "D3Q27")')
+argparser.add_argument('--model',     required = False, help = 'LBM model (currently only "BGK")')
 argparser.add_argument('--layout',    required = True,  help = 'Memory layout ("AOS" or "SOA")')
 argparser.add_argument('--index',     required = False, help = 'Cell indexing ("XYZ" or "ZYX")')
 argparser.add_argument('--precision', required = True,  help = 'Floating precision ("single" or "double")')
@@ -21,13 +22,17 @@ argparser.add_argument('--extras',      action = 'append', nargs = '+', default 
 
 args = argparser.parse_args()
 
-lattice = eval("lbm.model.%s" % args.lattice)
+if args.model is None:
+    args.model = "BGK"
+
+lattice = eval("lbm.lattice.%s" % args.lattice)
+model   = eval("lbm.model.%s"   % args.model)
 
 if args.index is None:
     args.index = 'XYZ'
 
 generator = Generator(
-    model      = LBM(lattice, tau = float(args.tau), optimize = not args.disable_cse),
+    model      = model(lattice, tau = float(args.tau), optimize = not args.disable_cse),
     target     = args.target,
     precision  = args.precision,
     index      = args.index,

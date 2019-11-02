@@ -10,7 +10,7 @@ void bounce_back_boundary(      ${float_type}* f_next,
 % endfor
 
 <%
-    subexpr, assignment = model.bgk(f_eq = model.equilibrium(resolve_moments = True))
+    subexpr, assignment = model.collision(f_eq = model.equilibrium(resolve_moments = True))
 %>
 
 % for i, expr in enumerate(subexpr):

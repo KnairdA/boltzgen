@@ -1,6 +1,6 @@
 <%
 moments_subexpr, moments_assignment = model.moments()
-collision_subexpr, collision_assignment = model.bgk(f_eq = model.equilibrium(resolve_moments = False))
+collision_subexpr, collision_assignment = model.collision(f_eq = model.equilibrium(resolve_moments = False))
 %>
 
 <%def name="momenta_boundary(name, param)">
@@ -30,7 +30,7 @@ __kernel void ${name}_momenta_boundary_gid(
     const ${float_type} ${ccode(expr)}
 % endfor
 
-% for i in range(0,descriptor.q):
+% for i, expr in enumerate(collision_assignment):
     preshifted_f_next[${layout.pop_offset(i)}] = f_next_${i};
 % endfor
 }
