@@ -1,3 +1,7 @@
+<%
+import sympy
+%>
+
 void collect_moments(const ${float_type}* f,
                      std::size_t gid,
                      ${float_type}& rho,
@@ -14,14 +18,14 @@ void collect_moments(const ${float_type}* f,
 %>
 
 % for i, expr in enumerate(moments_subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
+    const ${float_type} ${expr[0]} = ${sympy.ccode(expr[1])};
 % endfor
 
 % for i, expr in enumerate(moments_assignment):
 %   if i == 0:
-    rho = ${ccode(expr.rhs)};
+    rho = ${sympy.ccode(expr.rhs)};
 %   else:
-    u[${i-1}] = ${ccode(expr.rhs)};
+    u[${i-1}] = ${sympy.ccode(expr.rhs)};
 %   endif
 % endfor
 }

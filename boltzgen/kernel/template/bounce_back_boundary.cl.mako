@@ -1,3 +1,7 @@
+<%
+import sympy
+%>
+
 __kernel void bounce_back_boundary_gid(__global ${float_type}* f_next,
                                        __global ${float_type}* f_prev,
                                        unsigned int gid)
@@ -14,11 +18,11 @@ __kernel void bounce_back_boundary_gid(__global ${float_type}* f_next,
 %>
 
 % for i, expr in enumerate(subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
+    const ${float_type} ${expr[0]} = ${sympy.ccode(expr[1])};
 % endfor
 
 % for i, expr in enumerate(assignment):
-    const ${float_type} ${ccode(expr)}
+    const ${float_type} ${sympy.ccode(expr)}
 % endfor
 
 % for i, c_i in enumerate(descriptor.c):

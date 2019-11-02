@@ -1,3 +1,7 @@
+<%
+import sympy
+%>
+
 void bounce_back_boundary(      ${float_type}* f_next,
                           const ${float_type}* f_prev,
                           std::size_t gid)
@@ -14,11 +18,11 @@ void bounce_back_boundary(      ${float_type}* f_next,
 %>
 
 % for i, expr in enumerate(subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
+    const ${float_type} ${expr[0]} = ${sympy.ccode(expr[1])};
 % endfor
 
 % for i, expr in enumerate(assignment):
-    const ${float_type} ${ccode(expr)}
+    const ${float_type} ${sympy.ccode(expr)}
 % endfor
 
 % for i, c_i in enumerate(descriptor.c):

@@ -1,3 +1,7 @@
+<%
+import sympy
+%>
+
 __kernel void collect_moments_gid(__global ${float_type}* f,
                                   __global ${float_type}* m,
                                   unsigned int gid)
@@ -14,11 +18,11 @@ __kernel void collect_moments_gid(__global ${float_type}* f,
 %>
 
 % for i, expr in enumerate(moments_subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
+    const ${float_type} ${expr[0]} = ${sympy.ccode(expr[1])};
 % endfor
 
 % for i, expr in enumerate(moments_assignment):
-    preshifted_m[${i}] = ${ccode(expr.rhs)};
+    preshifted_m[${i}] = ${sympy.ccode(expr.rhs)};
 % endfor
 }
 

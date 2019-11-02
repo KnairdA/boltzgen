@@ -1,3 +1,7 @@
+<%
+import sympy
+%>
+
 void collide_and_stream(      ${float_type}* f_next,
                         const ${float_type}* f_prev,
                         std::size_t gid)
@@ -14,15 +18,14 @@ void collide_and_stream(      ${float_type}* f_next,
 %>
 
 % for i, expr in enumerate(subexpr):
-    const ${float_type} ${expr[0]} = ${ccode(expr[1])};
+    const ${float_type} ${expr[0]} = ${sympy.ccode(expr[1])};
 % endfor
 
 % for i, expr in enumerate(assignment):
-    const ${float_type} ${ccode(expr)}
+    const ${float_type} ${sympy.ccode(expr)}
 % endfor
 
 % for i, expr in enumerate(assignment):
     preshifted_f_next[${layout.pop_offset(i)}] = f_next_${i};
 % endfor
 }
-

@@ -1,5 +1,3 @@
-import sympy
-
 from mako.template import Template
 from pathlib import Path
 
@@ -33,12 +31,8 @@ class Generator:
             geometry   = geometry,
             index      = self.index_impl(geometry),
             layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
-
-            ccode = sympy.ccode,
-
             float_type = self.float_type,
-
-            extras = extras
+            extras     = extras
         )
 
     def kernel(self, geometry, functions, extras = []):
@@ -47,15 +41,13 @@ class Generator:
 
         return "\n".join(map(lambda f: self.instantiate(f, geometry, extras), functions))
 
-    def custom(self, geometry, source):
+    def custom(self, geometry, source, extras = []):
         return Template(text = source).render(
             descriptor = self.descriptor,
             model      = self.model,
             geometry   = geometry,
             index      = self.index_impl(geometry),
             layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
-
-            ccode = sympy.ccode,
-
             float_type = self.float_type,
+            extras     = extras
         )
