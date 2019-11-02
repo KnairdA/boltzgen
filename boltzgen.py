@@ -25,11 +25,18 @@ args = argparser.parse_args()
 if args.model is None:
     args.model = "BGK"
 
-lattice = eval("lbm.lattice.%s" % args.lattice)
-model   = eval("lbm.model.%s"   % args.model)
-
 if args.index is None:
     args.index = 'XYZ'
+
+try:
+    lattice = eval("lbm.lattice.%s" % args.lattice)
+except AttributeError:
+    raise Exception("There is no lattice type called '%s'" % args.lattice) from None
+
+try:
+    model = eval("lbm.model.%s" % args.model)
+except AttributeError:
+    raise Exception("There is no LBM model called '%s'" % args.model) from None
 
 generator = Generator(
     model      = model(lattice, tau = float(args.tau), optimize = not args.disable_cse),
