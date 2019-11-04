@@ -6,7 +6,7 @@ collision_subexpr, collision_assignment = model.collision(f_eq = model.equilibri
 %>
 
 <%def name="momenta_boundary(name, params)">
-<%call expr="pattern.operator_ab('%s_momenta_boundary' % name, params)">
+<%call expr="pattern.operator('%s_momenta_boundary' % name, params)">
 % for i, expr in enumerate(moments_subexpr):
     const ${float_type} ${expr[0]} = ${sympy.ccode(expr[1])};
 % endfor

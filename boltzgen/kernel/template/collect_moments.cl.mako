@@ -4,7 +4,7 @@ import sympy
 moments_subexpr, moments_assignment = model.moments()
 %>
 
-<%call expr="pattern.functor_ab('collect_moments', [('__global %s*' % float_type, 'm')])">
+<%call expr="pattern.functor('collect_moments', [('__global %s*' % float_type, 'm')])">
 % for i, expr in enumerate(moments_subexpr):
     const ${float_type} ${expr[0]} = ${sympy.ccode(expr[1])};
 % endfor

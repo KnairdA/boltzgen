@@ -1,4 +1,4 @@
-<%def name="operator_ab(name, params = None)">
+<%def name="operator(name, params = None)">
 __kernel void ${name}(
       __global ${float_type}* f_next
     , __global ${float_type}* f_prev
@@ -48,7 +48,7 @@ __kernel void ${name}_cells(
 % endif
 </%def>
 
-<%def name="functor_ab(name, params = None)">
+<%def name="functor(name, params = None)">
 __kernel void ${name}(
       __global ${float_type}* f
     , unsigned int gid

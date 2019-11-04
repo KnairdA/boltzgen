@@ -1,4 +1,4 @@
-<%def name="operator_ab(name, params = None)">
+<%def name="operator(name, params = None)">
 void ${name}(
             ${float_type}* f_next
     , const ${float_type}* f_prev
@@ -24,7 +24,7 @@ void ${name}(
 }
 </%def>
 
-<%def name="functor_ab(name, params = None)">
+<%def name="functor(name, params = None)">
 void ${name}(
       const ${float_type}* f
     , std::size_t gid
