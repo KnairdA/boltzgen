@@ -1,7 +1,13 @@
 from mako.template import Template
+from mako.lookup import TemplateLookup
+
 from pathlib import Path
 
 from . import memory
+
+template_lookup = TemplateLookup(directories = [
+    Path(__file__).parent/"template"
+])
 
 class Generator:
     def __init__(self, model, target, precision, index, layout):
@@ -25,12 +31,13 @@ class Generator:
         if not template_path.exists():
             raise Exception("Target '%s' doesn't provide '%s'" % (self.target, template))
 
-        return Template(filename = str(template_path)).render(
+        return Template(filename = str(template_path), lookup = template_lookup).render(
             descriptor = self.descriptor,
             model      = self.model,
             geometry   = geometry,
             index      = self.index_impl(geometry),
             layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
+            streaming  = 'AB',
             float_type = self.float_type,
             extras     = extras
         )
@@ -42,12 +49,13 @@ class Generator:
         return "\n".join(map(lambda f: self.instantiate(f, geometry, extras), functions))
 
     def custom(self, geometry, source, extras = []):
-        return Template(text = source).render(
+        return Template(text = source, lookup = template_lookup).render(
             descriptor = self.descriptor,
             model      = self.model,
             geometry   = geometry,
             index      = self.index_impl(geometry),
             layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
+            streaming  = 'AB',
             float_type = self.float_type,
             extras     = extras
         )

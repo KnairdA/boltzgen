@@ -9,7 +9,7 @@ setup(
     author      = 'Adrian Kummerlaender',
     packages    = find_packages(),
     include_package_data = True,
-    package_data = {'boltzgen': ['kernel/template/*.mako']},
+    package_data = {'boltzgen': ['kernel/template/*.mako', 'kernel/template/pattern/*.mako']},
     install_requires = [
         'sympy >= 1.4',
         'numpy >= 1.17.2',
