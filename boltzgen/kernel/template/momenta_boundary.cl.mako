@@ -26,7 +26,7 @@ collision_subexpr, collision_assignment = model.collision(f_eq = model.equilibri
 <%call expr="momenta_boundary('velocity', [('%s%d' % (float_type, descriptor.d), 'velocity')])">
     ${float_type} ${sympy.ccode(moments_assignment[0])}
 % for i, expr in enumerate(moments_assignment[1:]):
-    ${float_type} ${expr.lhs} = velocity[${i}];
+    ${float_type} ${expr.lhs} = velocity.${['x','y','z'][i]};
 % endfor
 </%call>
 
