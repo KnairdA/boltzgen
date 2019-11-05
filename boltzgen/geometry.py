@@ -28,6 +28,9 @@ class Geometry:
         for idx in ndindex(self.inner_size(), order=order):
             yield tuple(map(lambda i: i + 1, idx))
 
+    def cells(self, order='F'):
+        return ndindex(self.size(), order=order)
+
     def size(self):
         if self.size_z == 1:
             return (self.size_x, self.size_y)
