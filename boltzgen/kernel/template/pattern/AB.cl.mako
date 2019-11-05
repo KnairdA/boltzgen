@@ -66,4 +66,26 @@ __kernel void ${name}(
 
     ${caller.body()}
 }
+
+% if 'cell_list_dispatch' in extras:
+__kernel void ${name}_cells(
+      __global ${float_type}* f
+    , __global unsigned int* cells
+% if params is not None:
+% for param_type, param_name in params:
+    , ${param_type} ${param_name}
+% endfor
+% endif
+) {
+    ${name}(
+          f
+        , cells[get_global_id(0)]
+% if params is not None:
+% for param_type, param_name in params:
+        , ${param_name}
+% endfor
+% endif
+    );
+}
+% endif
 </%def>

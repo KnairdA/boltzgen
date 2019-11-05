@@ -15,12 +15,3 @@ moments_subexpr, moments_assignment = model.moments()
     preshifted_m[${i}] = ${sympy.ccode(expr.rhs)};
 % endfor
 </%call>
-
-% if 'cell_list_dispatch' in extras:
-__kernel void collect_moments_cells(__global ${float_type}* f,
-                                    __global ${float_type}* m,
-                                    __global unsigned int*  cells)
-{
-    collect_moments(f, cells[get_global_id(0)], m);
-}
-% endif
