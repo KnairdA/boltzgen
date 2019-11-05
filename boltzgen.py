@@ -10,9 +10,10 @@ argparser.add_argument('target', help = 'Target language (currently either "cl" 
 
 argparser.add_argument('--lattice',   required = True,  help = 'Lattice type ("D2Q9", "D3Q7", "D3Q19", "D3Q27")')
 argparser.add_argument('--model',     required = False, help = 'LBM model (currently only "BGK")')
+argparser.add_argument('--precision', required = True,  help = 'Floating precision ("single" or "double")')
 argparser.add_argument('--layout',    required = True,  help = 'Memory layout ("AOS" or "SOA")')
 argparser.add_argument('--index',     required = False, help = 'Cell indexing ("XYZ" or "ZYX")')
-argparser.add_argument('--precision', required = True,  help = 'Floating precision ("single" or "double")')
+argparser.add_argument('--streaming', required = True,  help = 'Streaming pattern ("AB" or "AA")')
 argparser.add_argument('--geometry',  required = True,  help = 'Size of the block geometry ("x:y(:z)")')
 argparser.add_argument('--tau',       required = True,  help = 'BGK relaxation time')
 
@@ -42,6 +43,7 @@ generator = Generator(
     model      = model(lattice, tau = float(args.tau), optimize = not args.disable_cse),
     target     = args.target,
     precision  = args.precision,
+    streaming  = args.streaming,
     index      = args.index,
     layout     = args.layout)
 

@@ -10,7 +10,7 @@ template_lookup = TemplateLookup(directories = [
 ])
 
 class Generator:
-    def __init__(self, model, target, precision, index, layout):
+    def __init__(self, model, target, precision, index, layout, streaming):
         self.model      = model
         self.descriptor = self.model.descriptor
         self.target     = target
@@ -26,6 +26,8 @@ class Generator:
         except AttributeError:
             raise Exception("There is no layout '%s'" % layout) from None
 
+        self.streaming = streaming
+
     def instantiate(self, template, geometry, extras = []):
         template_path = Path(__file__).parent/("template/%s.%s.mako" % (template, self.target))
         if not template_path.exists():
@@ -35,10 +37,10 @@ class Generator:
             descriptor = self.descriptor,
             model      = self.model,
             geometry   = geometry,
+            float_type = self.float_type,
             index      = self.index_impl(geometry),
             layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
-            streaming  = 'AB',
-            float_type = self.float_type,
+            streaming  = self.streaming,
             extras     = extras
         )
 
@@ -53,9 +55,9 @@ class Generator:
             descriptor = self.descriptor,
             model      = self.model,
             geometry   = geometry,
+            float_type = self.float_type,
             index      = self.index_impl(geometry),
             layout     = self.layout_impl(self.descriptor, self.index_impl, geometry),
-            streaming  = 'AB',
-            float_type = self.float_type,
+            streaming  = self.streaming,
             extras     = extras
         )
