@@ -12,8 +12,9 @@ At the moment this is a more structured and cleaned up version of the OpenCL ker
 * equilibrilization and moment collection utility functions
 * optimization via common subexpression elimination
 * array-of-structures and structure-of-arrays memory layouts
+* configurable cell indexing sequence
 * static resolution of memory offsets
-* AB streaming pattern
+* AB and AA streaming patterns
 * C++ and OpenCL targets
 * simple CLI frontend
 
@@ -24,23 +25,28 @@ The development and execution environment is described using a Nix expression in
 ```
 > nix-shell
 > ./boltzgen.py --help
-usage: boltzgen.py [-h] --lattice LATTICE --layout LAYOUT --precision
-                   PRECISION --geometry GEOMETRY --tau TAU [--disable-cse]
+usage: boltzgen.py [-h] --lattice LATTICE [--model MODEL] --precision
+                   PRECISION --layout LAYOUT [--index INDEX] --streaming
+                   STREAMING --geometry GEOMETRY --tau TAU [--disable-cse]
                    [--functions FUNCTIONS [FUNCTIONS ...]]
                    [--extras EXTRAS [EXTRAS ...]]
-                   language
+                   target
 
 Generate LBM kernels in various languages using a symbolic description.
 
 positional arguments:
-  language              Target language (currently either "cl" or "cpp")
+  target                Target language (currently either "cl" or "cpp")
 
 optional arguments:
   -h, --help            show this help message and exit
-  --lattice LATTICE     Lattice type (D2Q9, D3Q7, D3Q19, D3Q27)
-  --layout LAYOUT       Memory layout ("AOS" or "SOA")
+  --lattice LATTICE     Lattice type ("D2Q9", "D3Q7", "D3Q19", "D3Q27")
+  --model MODEL         LBM model (currently only "BGK")
   --precision PRECISION
                         Floating precision ("single" or "double")
+  --layout LAYOUT       Memory layout ("AOS" or "SOA")
+  --index INDEX         Cell indexing ("XYZ" or "ZYX")
+  --streaming STREAMING
+                        Streaming pattern ("AB" or "AA")
   --geometry GEOMETRY   Size of the block geometry ("x:y(:z)")
   --tau TAU             BGK relaxation time
   --disable-cse         Disable common subexpression elimination
@@ -51,8 +57,9 @@ optional arguments:
 
 > ./boltzgen.py cpp --lattice D2Q9
 \                   --geometry 128:128
-\                   --layout AOS
 \                   --precision double
+\                   --streaming AB
+\                   --layout AOS
 \                   --tau 0.52
 \                   --functions default bounce_back_boundary | tee kernel.h
 void collide_and_stream(      double* f_next,
@@ -69,3 +76,5 @@ void collide_and_stream(      double* f_next,
     const double f_curr_4 = preshifted_f_prev[4];
 [...]
 ```
+
+For some examples on how to actually run the generated code see [boltzgen_examples](https://github.com/KnairdA/boltzgen_examples).
