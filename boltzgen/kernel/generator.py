@@ -15,6 +15,11 @@ class Generator:
         self.descriptor = self.model.descriptor
         self.target     = target
         self.float_type = eval("memory.precision.%s" % target).get_float_type(precision)
+        self.streaming  = streaming
+
+        pattern_path = Path(__file__).parent/("template/pattern/%s.%s.mako" % (self.streaming, self.target))
+        if not pattern_path.exists():
+            raise Exception("Target '%s' doesn't provide streaming pattern '%s'" % (self.target, self.streaming))
 
         try:
             self.index_impl = eval("memory.index.%s" % index)
@@ -25,8 +30,6 @@ class Generator:
             self.layout_impl = eval("memory.layout.%s" % layout)
         except AttributeError:
             raise Exception("There is no layout '%s'" % layout) from None
-
-        self.streaming = streaming
 
     def instantiate(self, template, geometry, extras = []):
         template_path = Path(__file__).parent/("template/%s.%s.mako" % (template, self.target))
