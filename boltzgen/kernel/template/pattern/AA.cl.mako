@@ -44,7 +44,7 @@ __kernel void ${name}_tock(
 }
 
 % if 'cell_list_dispatch' in extras:
-__kernel void ${name}_tick_cells(
+__kernel void ${name}_cells_tick(
       __global ${float_type}* f
     , __global unsigned int* cells
 % if params is not None:
@@ -64,7 +64,7 @@ __kernel void ${name}_tick_cells(
     );
 }
 
-__kernel void ${name}_tock_cells(
+__kernel void ${name}_cells_tock(
       __global ${float_type}* f
     , __global unsigned int* cells
 % if params is not None:
@@ -124,7 +124,7 @@ __kernel void ${name}_tock(
 }
 
 % if 'cell_list_dispatch' in extras:
-__kernel void ${name}_tick_cells(
+__kernel void ${name}_cells_tick(
       __global ${float_type}* f
     , __global unsigned int* cells
 % if params is not None:
@@ -144,7 +144,7 @@ __kernel void ${name}_tick_cells(
     );
 }
 
-__kernel void ${name}_tock_cells(
+__kernel void ${name}_cells_tock(
       __global ${float_type}* f
     , __global unsigned int* cells
 % if params is not None:
