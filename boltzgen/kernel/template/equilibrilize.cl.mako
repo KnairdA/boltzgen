@@ -2,6 +2,6 @@
 
 <%call expr="pattern.operator('equilibrilize')">
 % for i, w_i in enumerate(descriptor.w):
-    ${float_type} f_next_${i} = ${w_i.evalf()};
+    const ${float_type} f_next_${i} = ${w_i.evalf()};
 % endfor
 </%call>
