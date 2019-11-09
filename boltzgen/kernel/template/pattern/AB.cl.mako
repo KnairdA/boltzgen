@@ -89,3 +89,23 @@ __kernel void ${name}_cells(
 }
 % endif
 </%def>
+
+<%def name="functor_with_domain_dispatch(name, params = None)">
+__kernel void ${name}(
+      __global ${float_type}* f
+% if params is not None:
+% for param_type, param_name in params:
+    , ${param_type} ${param_name}
+% endfor
+% endif
+) {
+    const unsigned int gid = ${index.gid('get_global_id(0)', 'get_global_id(1)', 'get_global_id(2)')};
+    __global ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
+
+% for i in range(0,descriptor.q):
+    const ${float_type} f_curr_${i} = preshifted_f[${layout.pop_offset(i)}];
+% endfor
+
+    ${caller.body()}
+}
+</%def>
