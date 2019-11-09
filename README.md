@@ -14,7 +14,7 @@ At the moment this is a more structured and cleaned up version of the OpenCL ker
 * array-of-structures and structure-of-arrays memory layouts
 * configurable cell indexing sequence
 * static resolution of memory offsets
-* AB and AA streaming patterns
+* AB, AA and SSS streaming patterns
 * C++ and OpenCL targets
 * simple CLI frontend
 

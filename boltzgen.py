@@ -13,7 +13,7 @@ argparser.add_argument('--model',     required = False, help = 'LBM model (curre
 argparser.add_argument('--precision', required = True,  help = 'Floating precision ("single" or "double")')
 argparser.add_argument('--layout',    required = True,  help = 'Memory layout ("AOS" or "SOA")')
 argparser.add_argument('--index',     required = False, help = 'Cell indexing ("XYZ" or "ZYX")')
-argparser.add_argument('--streaming', required = True,  help = 'Streaming pattern ("AB" or "AA")')
+argparser.add_argument('--streaming', required = True,  help = 'Streaming pattern ("AB", "AA" or "SSS")')
 argparser.add_argument('--geometry',  required = True,  help = 'Size of the block geometry ("x:y(:z)")')
 argparser.add_argument('--tau',       required = True,  help = 'BGK relaxation time')
 
