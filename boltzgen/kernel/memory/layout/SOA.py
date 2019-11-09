@@ -7,8 +7,8 @@ class SOA:
     def cell_preshift(self, gid):
         return gid
 
-    def pop_offset(self, i):
-        return i * self.geometry.volume
+    def pop_offset(self, i, padding = 0):
+        return i * (self.geometry.volume + padding)
 
     def neighbor_offset(self, c_i):
         return self.index.neighbor(c_i)
