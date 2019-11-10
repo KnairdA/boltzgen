@@ -1,5 +1,6 @@
 from . import optimizations
 from . import ndindex
+from . import printer
 
 from sympy.codegen.ast import Assignment
 

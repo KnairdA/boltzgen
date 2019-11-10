@@ -14,3 +14,6 @@ class cpp(common):
 
 class cl(common):
     pass
+
+class cuda(common):
+    pass
