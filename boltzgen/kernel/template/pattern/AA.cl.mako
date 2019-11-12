@@ -1,13 +1,20 @@
 <%def name="operator(name, params = None)">
 __kernel void ${name}_tick(
       __global ${float_type}* f
+% if 'cell_list_dispatch' in extras:
+    , __global unsigned int* cells
+% else:
     , unsigned int gid
+% endif
 % if params is not None:
 % for param_type, param_name in params:
     , ${param_type} ${param_name}
 % endfor
 % endif
 ) {
+% if 'cell_list_dispatch' in extras:
+    const unsigned int gid = cells[get_global_id(0)];
+% endif
     __global ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
 
 % for i, c_i in enumerate(descriptor.c):
@@ -23,13 +30,20 @@ __kernel void ${name}_tick(
 
 __kernel void ${name}_tock(
       __global ${float_type}* f
+% if 'cell_list_dispatch' in extras:
+    , __global unsigned int* cells
+% else:
     , unsigned int gid
+% endif
 % if params is not None:
 % for param_type, param_name in params:
     , ${param_type} ${param_name}
 % endfor
 % endif
 ) {
+% if 'cell_list_dispatch' in extras:
+    const unsigned int gid = cells[get_global_id(0)];
+% endif
     __global ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
 
 % for i, c_i in enumerate(descriptor.c):
@@ -42,60 +56,71 @@ __kernel void ${name}_tock(
     preshifted_f[${layout.pop_offset(i) + layout.neighbor_offset(c_i)}] = f_next_${i};
 % endfor
 }
+</%def>
 
-% if 'cell_list_dispatch' in extras:
-__kernel void ${name}_cells_tick(
+<%def name="operator_with_domain_dispatch(name, params = None)">
+__kernel void ${name}_tick(
       __global ${float_type}* f
-    , __global unsigned int* cells
 % if params is not None:
 % for param_type, param_name in params:
     , ${param_type} ${param_name}
 % endfor
 % endif
 ) {
-    ${name}_tick(
-          f
-        , cells[get_global_id(0)]
-% if params is not None:
-% for param_type, param_name in params:
-        , ${param_name}
+    const unsigned int gid = ${index.gid('get_global_id(0)', 'get_global_id(1)', 'get_global_id(2)')};
+    __global ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
+
+% for i, c_i in enumerate(descriptor.c):
+    const ${float_type} f_curr_${i} = preshifted_f[${layout.pop_offset(i)}];
 % endfor
-% endif
-    );
+
+    ${caller.body()}
+
+% for i, c_i in enumerate(descriptor.c):
+    preshifted_f[${layout.pop_offset(i)}] = f_next_${descriptor.c.index(-c_i)};
+% endfor
 }
 
-__kernel void ${name}_cells_tock(
+__kernel void ${name}_tock(
       __global ${float_type}* f
-    , __global unsigned int* cells
 % if params is not None:
 % for param_type, param_name in params:
     , ${param_type} ${param_name}
 % endfor
 % endif
 ) {
-    ${name}_tock(
-          f
-        , cells[get_global_id(0)]
-% if params is not None:
-% for param_type, param_name in params:
-        , ${param_name}
+    const unsigned int gid = ${index.gid('get_global_id(0)', 'get_global_id(1)', 'get_global_id(2)')};
+    __global ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
+
+% for i, c_i in enumerate(descriptor.c):
+    const ${float_type} f_curr_${descriptor.c.index(-c_i)} = preshifted_f[${layout.pop_offset(i) + layout.neighbor_offset(c_i)}];
 % endfor
-% endif
-    );
+
+    ${caller.body()}
+
+% for i, c_i in enumerate(descriptor.c):
+    preshifted_f[${layout.pop_offset(i) + layout.neighbor_offset(c_i)}] = f_next_${i};
+% endfor
 }
-% endif
 </%def>
 
 <%def name="functor(name, params = None)">
 __kernel void ${name}_tick(
       __global ${float_type}* f
+% if 'cell_list_dispatch' in extras:
+    , __global unsigned int* cells
+% else:
     , unsigned int gid
+% endif
 % if params is not None:
 % for param_type, param_name in params:
     , ${param_type} ${param_name}
 % endfor
 % endif
 ) {
+% if 'cell_list_dispatch' in extras:
+    const unsigned int gid = cells[get_global_id(0)];
+% endif
     __global ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
 
 % for i, c_i in enumerate(descriptor.c):
@@ -107,13 +132,20 @@ __kernel void ${name}_tick(
 
 __kernel void ${name}_tock(
       __global ${float_type}* f
+% if 'cell_list_dispatch' in extras:
+    , __global unsigned int* cells
+% else:
     , unsigned int gid
+% endif
 % if params is not None:
 % for param_type, param_name in params:
     , ${param_type} ${param_name}
 % endfor
 % endif
 ) {
+% if 'cell_list_dispatch' in extras:
+    const unsigned int gid = cells[get_global_id(0)];
+% endif
     __global ${float_type}* preshifted_f = f + ${layout.cell_preshift('gid')};
 
 % for i, c_i in enumerate(descriptor.c):
@@ -122,48 +154,6 @@ __kernel void ${name}_tock(
 
     ${caller.body()}
 }
-
-% if 'cell_list_dispatch' in extras:
-__kernel void ${name}_cells_tick(
-      __global ${float_type}* f
-    , __global unsigned int* cells
-% if params is not None:
-% for param_type, param_name in params:
-    , ${param_type} ${param_name}
-% endfor
-% endif
-) {
-    ${name}_tick(
-          f
-        , cells[get_global_id(0)]
-% if params is not None:
-% for param_type, param_name in params:
-        , ${param_name}
-% endfor
-% endif
-    );
-}
-
-__kernel void ${name}_cells_tock(
-      __global ${float_type}* f
-    , __global unsigned int* cells
-% if params is not None:
-% for param_type, param_name in params:
-    , ${param_type} ${param_name}
-% endfor
-% endif
-) {
-    ${name}_tock(
-          f
-        , cells[get_global_id(0)]
-% if params is not None:
-% for param_type, param_name in params:
-        , ${param_name}
-% endfor
-% endif
-    );
-}
-% endif
 </%def>
 
 <%def name="functor_with_domain_dispatch(name, params = None)">
