@@ -12,7 +12,7 @@ expand_neg_square = ReplaceOptim(
     lambda p: UnevaluatedExpr(Mul(p.base, p.base, evaluate = False))
 )
 
-custom = [
+custom = cse_main.basic_optimizations + [
     (expand_pos_square, expand_pos_square),
     (expand_neg_square, expand_neg_square)
-] + cse_main.basic_optimizations
+]
