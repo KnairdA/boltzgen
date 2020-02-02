@@ -6,7 +6,7 @@ subexpr, assignment = model.collision(f_eq = model.equilibrium(resolve_moments =
 
 %>
 
-<%call expr="pattern.operator('collide_and_stream')">
+<%call expr="pattern.operator('collide')">
 % for i, expr in enumerate(subexpr):
     const ${float_type} ${expr[0]} = ${ccode(expr[1])};
 % endfor

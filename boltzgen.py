@@ -53,7 +53,7 @@ functions = sum(args.functions, [])
 if len(functions) == 0:
     functions += ['default']
 if 'default' in functions:
-    for f in ['collide_and_stream', 'equilibrilize', 'collect_moments', 'momenta_boundary']:
+    for f in ['collide', 'equilibrilize', 'collect_moments', 'momenta_boundary']:
         functions.insert(functions.index('default'), f)
     functions.remove('default')
 

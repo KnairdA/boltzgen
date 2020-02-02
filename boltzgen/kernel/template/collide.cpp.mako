@@ -1,10 +1,10 @@
-<%namespace name="pattern" file="${'/pattern/%s.cl.mako' % context['streaming']}"/>
+<%namespace name="pattern" file="${'/pattern/%s.cpp.mako' % context['streaming']}"/>
 <%
 import sympy
 subexpr, assignment = model.collision(f_eq = model.equilibrium(resolve_moments = True))
 %>
 
-<%call expr="pattern.operator('collide_and_stream')">
+<%call expr="pattern.operator('collide')">
 % for i, expr in enumerate(subexpr):
     const ${float_type} ${expr[0]} = ${sympy.ccode(expr[1])};
 % endfor
